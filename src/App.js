@@ -2,6 +2,11 @@ import "./App.css";
 import SignUp from "./signup/SignUp";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Header from "./layout/Header";
+import Profile from "./Myinfo/Profile";
+import ProfileEdit from "./Myinfo/ProfileEdit";
+import PostList from "./Post/Post";
+import WritePost from "./Post/WritePost";
+import PostDetail from "./Post/PostDetail";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -10,7 +15,14 @@ const router = createBrowserRouter([
         <Header />
       </div>
     ),
-    children: [{ path: "/signup", element: <SignUp /> }],
+    children: [
+      { path: "/signup", element: <SignUp /> },
+      { path: "/profile", element: <Profile /> },
+      { path: "/profileEdit", element: <ProfileEdit /> },
+      { path: "/post", element: <PostList /> },
+      { path: "/post/new", element: <WritePost /> },
+      { path: "/post/:postId", element: <PostDetail /> },
+    ],
   },
 ]);
 function App() {

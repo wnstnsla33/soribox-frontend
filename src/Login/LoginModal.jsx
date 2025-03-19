@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import SnsLoginButton from "./SnsLoginButton";
 import LoginButton from "./LoginButton";
 
-export default function LoginModal({ onClose }) {
+export default function LoginModal({ onClose, findid, findpwd }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -50,10 +50,10 @@ export default function LoginModal({ onClose }) {
         <Link to="/signup" className="hover:underline" onClick={onClose}>
           회원가입
         </Link>
-        <Link to="/find-id" className="hover:underline">
+        <Link onClick={findid} className="hover:underline">
           아이디 찾기
         </Link>
-        <Link to="/find-password" className="hover:underline">
+        <Link onClick={findpwd} className="hover:underline">
           비밀번호 찾기
         </Link>
       </div>

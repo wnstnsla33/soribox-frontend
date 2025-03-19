@@ -1,72 +1,90 @@
 import React, { useState, useEffect } from "react";
-import LoginModal from "../Login/LoginModal";
 import { Outlet } from "react-router-dom";
-import Menu from "./Menu";
-import { getMyInfo } from "./myInfo";
-import UserModal from "../Myinfo/Myinfo";
-
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUserInfo, logout } from "../store/userSlice";
+import HeaderButtons from "./HeaderButton";
+import logoImage from "../img/myplace.png";
 export default function Header() {
+  const dispatch = useDispatch();
+  const userInfo = useSelector((state) => state.user.userInfo);
+  const [isfindIdOpen, setIsFindidOpen] = useState(false);
+  const [isfindpwdOpen, setIsFindpwdOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isInfoOpen, setIsInfoOpen] = useState(false);
-  const [info, setInfo] = useState(null);
 
   const toggleLogin = () => {
     setIsLoginOpen(!isLoginOpen);
     setIsMenuOpen(false);
     setIsInfoOpen(false);
+    setIsFindidOpen(false);
+    setIsFindpwdOpen(false);
   };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
     setIsLoginOpen(false);
     setIsInfoOpen(false);
+    setIsFindidOpen(false);
+    setIsFindpwdOpen(false);
   };
 
   const infoOpen = () => {
     setIsInfoOpen(!isInfoOpen);
     setIsLoginOpen(false);
     setIsMenuOpen(false);
+    setIsFindidOpen(false);
+    setIsFindpwdOpen(false);
+  };
+  const findId = () => {
+    setIsInfoOpen(false);
+    setIsLoginOpen(false);
+    setIsMenuOpen(false);
+    setIsFindidOpen(!isfindIdOpen);
+    setIsFindpwdOpen(false);
+  };
+  const findPwd = () => {
+    setIsInfoOpen(false);
+    setIsLoginOpen(false);
+    setIsMenuOpen(false);
+    setIsFindidOpen(false);
+    setIsFindpwdOpen(!isfindpwdOpen);
   };
 
-  const fetchInfo = async () => {
-    const userInfo = await getMyInfo();
-    setInfo(userInfo);
-    console.log(info?.userName);
-  };
-
-  const logout = async () => {
-    await fetch("/logout", { method: "POST", credentials: "include" });
-    setInfo(null);
-    window.location.href = "/";
+  const handleLogout = async () => {
+    try {
+      await dispatch(logout()).unwrap();
+      window.location.replace("/");
+    } catch (error) {
+      console.error("로그아웃 실패", error);
+    }
   };
 
   useEffect(() => {
-    fetchInfo();
-  }, []);
+    dispatch(fetchUserInfo());
+  }, [dispatch]);
 
   return (
     <>
       <header>
-        <div className="flex justify-between items-center h-16 bg-[#DED8CB] w-screen px-4">
-          <div>
-            <button>홈으로</button>
-          </div>
-          <div className="relative flex gap-4 justify-end">
-            {info ? (
-              <button onClick={infoOpen}>내 정보</button>
-            ) : (
-              <button onClick={toggleLogin}>로그인</button>
-            )}
-            {isLoginOpen && <LoginModal onClose={toggleLogin} />}
-            {isInfoOpen && (
-              <UserModal onClose={infoOpen} user={info} onLogout={logout} />
-            )}
-            <div className="relative">
-              <button onClick={toggleMenu}>메뉴 ▼</button>
-              {isMenuOpen && <Menu />}
-            </div>
-          </div>
+        <div className="flex justify-between items-center h-16 bg-[#FFF4EA] w-screen px-4">
+          <button onClick={() => (window.location.href = "/")}>
+            <img src={logoImage} alt="로고" className="h-12" />
+          </button>
+          <HeaderButtons
+            userInfo={userInfo}
+            isLoginOpen={isLoginOpen}
+            isInfoOpen={isInfoOpen}
+            isMenuOpen={isMenuOpen}
+            isFindIdOpen={isfindIdOpen}
+            IsFindpwdOpen={isfindpwdOpen}
+            toggleLogin={toggleLogin}
+            infoOpen={infoOpen}
+            toggleMenu={toggleMenu}
+            handleLogout={handleLogout}
+            findid={findId}
+            findpwd={findPwd}
+          />
         </div>
       </header>
       <Outlet />
