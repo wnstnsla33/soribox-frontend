@@ -2,22 +2,71 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// 비동기 thunk로 로그인한 내 정보 가져오기
-export const fetchUserInfo = createAsyncThunk(
-  "user/fetchUserInfo",
-  async () => {
-    const response = await axios.get("http://localhost:8080/user", {
+// ✅ access 토큰 재발급 함수
+const refreshAccessToken = async () => {
+  console.log("🟡 refreshAccessToken() 호출됨");
+  try {
+    const res = await axios.get("http://localhost:8080/auth/getToken", {
       withCredentials: true,
     });
-    return response.data;
+    console.log("🟢 access 재발급 성공:", res.data);
+    return true;
+  } catch (err) {
+    console.log("🔴 access 재발급 실패:", err.response?.status);
+    return false;
+  }
+};
+
+// ✅ 비동기 thunk로 로그인한 내 정보 가져오기 (access 만료 대응 포함)
+export const fetchUserInfo = createAsyncThunk(
+  "user/fetchUserInfo",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axios.get("http://localhost:8080/user", {
+        withCredentials: true,
+      });
+      console.log(res.data);
+      return res.data;
+    } catch (err) {
+      const status = err.response?.status;
+
+      console.log("🔴 fetchUserInfo 에러 상태코드:", status);
+
+      // access 토큰 만료인 경우 → refresh로 재발급 시도
+      if (status === 401) {
+        const refreshed = await refreshAccessToken();
+
+        if (refreshed) {
+          try {
+            // 재발급 성공했으면 다시 유저 정보 요청
+            const retryRes = await axios.get("http://localhost:8080/user", {
+              withCredentials: true,
+            });
+            return retryRes.data;
+          } catch (retryErr) {
+            console.log("🔴 재요청 실패:", retryErr.response?.status);
+            return rejectWithValue(retryErr.response?.status);
+          }
+        } else {
+          console.log("🔴 refresh 토큰도 만료됨. 로그인 필요.");
+          // window.location.href = "/"; // or dispatch(logout())
+          return rejectWithValue("refresh expired");
+        }
+      }
+
+      return rejectWithValue(status);
+    }
   }
 );
 
-// 로그아웃 처리
+// ✅ 로그아웃 처리
 export const logout = createAsyncThunk("user/logout", async () => {
   await axios
-    .post("http://localhost:8080/user/logout", {}, { withCredentials: true })
-    .then((res) => alert(res.data));
+    .post("http://localhost:8080/auth/logout", {}, { withCredentials: true })
+    .then((res) => {
+      alert(res.data);
+      fetchUserInfo();
+    });
   return null;
 });
 
@@ -31,6 +80,10 @@ const userSlice = createSlice({
     builder
       .addCase(fetchUserInfo.fulfilled, (state, action) => {
         state.userInfo = action.payload;
+      })
+      .addCase(fetchUserInfo.rejected, (state, action) => {
+        console.warn("❌ 유저 정보 요청 실패:", action.payload);
+        state.userInfo = null;
       })
       .addCase(logout.fulfilled, (state) => {
         state.userInfo = null;

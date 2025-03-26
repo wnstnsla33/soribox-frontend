@@ -4,6 +4,7 @@ import UserModal from "../Myinfo/Myinfo";
 import Menu from "./Menu";
 import FindIdModal from "../Login/FindIdModal";
 import FindPwdModal from "../Login/FindPwdModal";
+import { Link } from "react-router-dom";
 export default function HeaderButtons({
   userInfo,
   isLoginOpen,
@@ -19,7 +20,13 @@ export default function HeaderButtons({
   findpwd,
 }) {
   return (
-    <div className="relative flex gap-4 justify-end">
+    <div className="relative flex gap-4 justify-end items-center">
+      {userInfo && (
+        <Link to="/createRoom">
+          <button>글쓰기</button>
+        </Link>
+      )}
+
       {userInfo ? (
         <button onClick={infoOpen}>내 정보</button>
       ) : (
@@ -34,6 +41,7 @@ export default function HeaderButtons({
       )}
       {isFindIdOpen && <FindIdModal onClose={findid} />}
       {IsFindpwdOpen && <FindPwdModal onClose={findpwd} />}
+
       <div className="relative">
         <button onClick={toggleMenu}>메뉴 ▼</button>
         {isMenuOpen && <Menu onClose={toggleMenu} />}

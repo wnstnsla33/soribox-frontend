@@ -84,6 +84,7 @@ export default function Header() {
             handleLogout={handleLogout}
             findid={findId}
             findpwd={findPwd}
+            onWriteClick={writeClick}
           />
         </div>
       </header>

@@ -26,9 +26,11 @@ export default function LoginButton({ email, password, onclose }) {
         }
       )
       .then((res) => {
+        console.log(res.status);
         if (res.status === 200) {
           console.log("로그인 성공!");
           onclose();
+          window.location.href = "/";
         }
       })
       .catch((error) => {
