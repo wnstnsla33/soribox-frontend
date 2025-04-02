@@ -11,8 +11,9 @@ import PostEdit from "./Post/PostEdit";
 import MyPost from "./Post/filterPost/MyPost";
 import Stomp from "./stomp/Stmop";
 import CreateRoom from "./room/CreateRoom";
-import Rooms from "./room/Rooms";
 import ChatRoom from "./room/ChatRoom";
+import MainPage from "./layout/MainPage";
+import MyRooms from "./room/MyRooms/MyRooms";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -32,8 +33,9 @@ const router = createBrowserRouter([
       { path: "/post/myPost", element: <MyPost /> },
       { path: "/stomp", element: <Stomp /> },
       { path: "/createRoom", element: <CreateRoom /> },
-      { path: "/rooms", element: <Rooms /> },
+      { path: "/", element: <MainPage /> },
       { path: "/room/:roomId", element: <ChatRoom /> },
+      { path: "/myRooms", element: <MyRooms /> },
     ],
   },
 ]);

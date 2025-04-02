@@ -1,0 +1,62 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
+import PostListComponent from "../Post/PostListComponent";
+export default function MainPost() {
+  const [top10Post, setTop10Post] = useState([]);
+  const [userBookmarks, setUserBookmarks] = useState(new Set());
+
+  useEffect(() => {
+    const fetchTopPosts = async () => {
+      try {
+        const postRes = await axios.get("http://localhost:8080/post/topView", {
+          withCredentials: true,
+        });
+        const bookmarkRes = await axios.get(
+          "http://localhost:8080/post/bookmarkList",
+          { withCredentials: true }
+        );
+        setTop10Post(postRes.data);
+        setUserBookmarks(new Set(bookmarkRes.data || []));
+      } catch (err) {
+        console.error("TopView 불러오기 실패:", err);
+      }
+    };
+    fetchTopPosts();
+  }, []);
+
+  const toggleBookmark = async (postId) => {
+    try {
+      const res = await axios.post(
+        `http://localhost:8080/post/bookmark/${postId}`,
+        {},
+        { withCredentials: true }
+      );
+      const updatedPost = res.data;
+      setTop10Post((prevPosts) =>
+        prevPosts.map((post) =>
+          post.postId === updatedPost.postId
+            ? { ...post, bookmarkCount: updatedPost.postBookmarkCount }
+            : post
+        )
+      );
+      setUserBookmarks((prev) => {
+        const updated = new Set(prev);
+        updatedPost.bookmarked ? updated.add(postId) : updated.delete(postId);
+        return updated;
+      });
+    } catch (err) {
+      console.error("북마크 실패:", err);
+    }
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-10">
+      <h2 className="text-2xl font-bold mb-6">🔥 인기 게시글 Top 10</h2>
+      <PostListComponent
+        posts={top10Post}
+        userBookmarks={userBookmarks}
+        ClickBookmark={toggleBookmark}
+      />
+    </div>
+  );
+}

@@ -5,10 +5,11 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { fetchUserInfo } from "../store/userSlice";
 import ProfileEditForm from "./ProfileEditForm";
+
 export default function ProfileEdit() {
-  const nav = useNavigate();
-  const user = useSelector((state) => state.user.userInfo);
+  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.userInfo);
 
   // 새로고침 시 유저 정보 가져오기
   useEffect(() => {
@@ -17,29 +18,46 @@ export default function ProfileEdit() {
     }
   }, [dispatch, user]);
 
-  const handleUpdate = (userData, isSNSUser) => {
-    if (!isSNSUser && !userData.userPassword.trim()) {
-      alert("현재 비밀번호를 입력하세요.");
+  const handleUpdate = async (userData, isSNSUser) => {
+    if (!isSNSUser && !userData.get("userPassword")?.trim()) {
+      alert("현재 비밀번호를 입력해주세요.");
       return;
     }
-
-    axios
-      .post("http://localhost:8080/user/edit", userData, {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
-      })
-      .then((res) => {
-        dispatch(fetchUserInfo(res.data));
-        alert("프로필이 수정되었습니다.");
-        nav("/profile");
-      })
-      .catch((err) => {
-        console.error(err);
-        alert("프로필 수정 실패");
-      });
+    try {
+      const res = await axios.post(
+        "http://localhost:8080/user/edit",
+        userData,
+        {
+          withCredentials: true,
+        }
+      );
+      dispatch(fetchUserInfo(res.data));
+      alert("프로필이 성공적으로 수정되었습니다.");
+      navigate("/profile");
+    } catch (err) {
+      console.error("프로필 수정 실패:", err);
+      alert("프로필 수정에 실패했습니다. 다시 시도해주세요.");
+    }
   };
 
-  if (!user) return <div>Loading...</div>;
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-gray-600 text-lg">로딩 중...</div>
+      </div>
+    );
+  }
 
-  return <ProfileEditForm user={user} onUpdate={handleUpdate} />;
+  // 이미지 기본 경로 세팅
+  const updatedUser = {
+    ...user,
+    userImg: `http://localhost:8080${user.userImg}`,
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-xl mt-10">
+      <h2 className="text-2xl font-bold mb-6 text-center">프로필 수정</h2>
+      <ProfileEditForm user={updatedUser} onUpdate={handleUpdate} />
+    </div>
+  );
 }

@@ -25,7 +25,6 @@ export const fetchUserInfo = createAsyncThunk(
       const res = await axios.get("http://localhost:8080/user", {
         withCredentials: true,
       });
-      console.log(res.data);
       return res.data;
     } catch (err) {
       const status = err.response?.status;

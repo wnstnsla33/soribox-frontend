@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUserInfo, logout } from "../store/userSlice";
 import HeaderButtons from "./HeaderButton";
-import logoImage from "../img/myplace.png";
+
 export default function Header() {
+  const location = useLocation();
+  const isMainPage = location.pathname === "/";
+
   const dispatch = useDispatch();
   const userInfo = useSelector((state) => state.user.userInfo);
   const [isfindIdOpen, setIsFindidOpen] = useState(false);
@@ -36,6 +39,7 @@ export default function Header() {
     setIsFindidOpen(false);
     setIsFindpwdOpen(false);
   };
+
   const findId = () => {
     setIsInfoOpen(false);
     setIsLoginOpen(false);
@@ -43,6 +47,7 @@ export default function Header() {
     setIsFindidOpen(!isfindIdOpen);
     setIsFindpwdOpen(false);
   };
+
   const findPwd = () => {
     setIsInfoOpen(false);
     setIsLoginOpen(false);
@@ -66,28 +71,42 @@ export default function Header() {
 
   return (
     <>
-      <header>
-        <div className="flex justify-between items-center h-16 bg-[#FFF4EA] w-screen px-4">
-          <button onClick={() => (window.location.href = "/")}>
-            <img src={logoImage} alt="로고" className="h-12" />
-          </button>
-          <HeaderButtons
-            userInfo={userInfo}
-            isLoginOpen={isLoginOpen}
-            isInfoOpen={isInfoOpen}
-            isMenuOpen={isMenuOpen}
-            isFindIdOpen={isfindIdOpen}
-            IsFindpwdOpen={isfindpwdOpen}
-            toggleLogin={toggleLogin}
-            infoOpen={infoOpen}
-            toggleMenu={toggleMenu}
-            handleLogout={handleLogout}
-            findid={findId}
-            findpwd={findPwd}
-            onWriteClick={writeClick}
-          />
+      <header
+        className={`${
+          isMainPage ? "absolute top-0 left-0" : "relative"
+        } w-full z-20`}
+      >
+        <div className="max-w-[1600px] mx-auto px-10 py-6 flex justify-between items-center">
+          <div className="flex items-center gap-12">
+            <button onClick={() => (window.location.href = "/")}>
+              <h1
+                className={`text-2xl font-bold ${
+                  isMainPage ? "text-white" : "text-black"
+                }`}
+              >
+                SoriBox
+              </h1>
+            </button>
+          </div>
+          <div className="flex items-center gap-4">
+            <HeaderButtons
+              userInfo={userInfo}
+              isLoginOpen={isLoginOpen}
+              isInfoOpen={isInfoOpen}
+              isMenuOpen={isMenuOpen}
+              isFindIdOpen={isfindIdOpen}
+              IsFindpwdOpen={isfindpwdOpen}
+              toggleLogin={toggleLogin}
+              infoOpen={infoOpen}
+              toggleMenu={toggleMenu}
+              handleLogout={handleLogout}
+              findid={findId}
+              findpwd={findPwd}
+            />
+          </div>
         </div>
       </header>
+
       <Outlet />
     </>
   );

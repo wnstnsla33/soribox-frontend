@@ -15,32 +15,28 @@ export default function PostDetail() {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user.userInfo);
 
-  const passedPost = location.state?.post;
-  const [post, setPost] = useState(passedPost);
+  const [post, setPost] = useState(null);
   const [replies, setReplies] = useState([]);
   const [newReply, setNewReply] = useState("");
   const [password, setPassword] = useState("");
   const [showPasswordPopup, setShowPasswordPopup] = useState(false);
   const dispatch = useDispatch();
-  console.log(user);
   useEffect(() => {
     const fetchData = async () => {
       try {
         if (!user) {
           await dispatch(fetchUserInfo()).unwrap(); // ✅ user 정보를 반드시 먼저 가져오기
         }
-
+        console.log(post);
         // 그 후 게시글 가져오기
-        if (!post) {
-          const res = await axios.get(`http://localhost:8080/post/${postId}`, {
-            withCredentials: true,
-          });
+        const res = await axios.get(`http://localhost:8080/post/${postId}`, {
+          withCredentials: true,
+        });
 
-          if (res.data.title === "비밀글") {
-            setShowPasswordPopup(true);
-          } else {
-            setPost(res.data);
-          }
+        if (res.data.title === "비밀글") {
+          setShowPasswordPopup(true);
+        } else {
+          setPost(res.data);
         }
 
         // 댓글 가져오기 (비밀글 제외)
@@ -205,15 +201,11 @@ export default function PostDetail() {
           <span>조회수: {post.viewCount}</span>
         </div>
 
-        {/* 대표 이미지 */}
-        <img
-          src={`http://localhost:8080${post.titleImg}`}
-          alt={post.title}
-          className="w-full h-96 object-cover rounded-lg mb-6"
-        />
-
         {/* 내용 */}
-        <div className="text-lg mb-8 whitespace-pre-line">{post.content}</div>
+        <div
+          className="text-lg mb-8 leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: post.content }}
+        ></div>
 
         {/* 수정일 */}
         <div className="text-sm text-gray-500">수정일: {post.modifiedDate}</div>

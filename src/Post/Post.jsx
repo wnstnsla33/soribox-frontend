@@ -17,7 +17,7 @@ export default function Post() {
   } = usePostData(showBookmarksOnly, sortType); // sortType도 넘길 수 있도록 설계하면 좋아요
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
+    <div className="max-w-7xl mx-auto px-4 py-6">
       {/* 북마크 토글 */}
       <div className="flex items-center justify-between mb-6">
         {/* 토글 스위치 */}
@@ -76,7 +76,7 @@ export default function Post() {
           </button>
         </div>
       </div>
-
+      {console.log(posts)}
       {/* 게시글 리스트 */}
       <PostListComponent
         posts={posts}

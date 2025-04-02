@@ -20,7 +20,6 @@ export default function usePostData(showBookmarksOnly, sortType) {
           withCredentials: true,
         }
       );
-      console.log(postRes);
       setPosts(postRes.data.posts || []);
       setTotalPages(Math.ceil(postRes.data.postCount / 10) || 1);
       setUserBookmarks(new Set(bookmarkRes.data || []));

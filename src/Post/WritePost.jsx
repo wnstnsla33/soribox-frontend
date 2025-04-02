@@ -1,20 +1,49 @@
 import React, { useRef, useState } from "react";
 import axios from "axios";
-
+import { Editor } from "@toast-ui/react-editor";
+import "@toast-ui/editor/dist/toastui-editor.css";
+import { useNavigate } from "react-router-dom";
 export default function WritePost() {
   const titleRef = useRef(null);
-  const contentRef = useRef(null);
-  const imageRef = useRef(null);
+  const editorRef = useRef(null);
   const [isSecret, setIsSecret] = useState(false);
   const [secretPassword, setSecretPassword] = useState("");
+  const navigate = useNavigate();
+  // HTML에서 첫 번째 이미지 src 추출
+  const extractFirstImageSrc = (html) => {
+    const match = html.match(/<img[^>]+src=["']?([^>"']+)["']?/);
+    return match ? match[1] : "http://localhost:8080/uploads/noimg.png";
+  };
+
+  // 에디터 내부 이미지 업로드 처리
+  const handleImageUpload = async (blob, callback) => {
+    const formData = new FormData();
+    formData.append("image", blob);
+    try {
+      const res = await axios.post(
+        "http://localhost:8080/post/image",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          withCredentials: true,
+        }
+      );
+      const fullUrl = "http://localhost:8080" + res.data;
+      callback(fullUrl, "이미지");
+    } catch (err) {
+      console.error("이미지 업로드 실패:", err);
+    }
+  };
 
   const handleSubmit = async () => {
+    const contentHTML = editorRef.current.getInstance().getHTML();
+    const titleImgSrc = extractFirstImageSrc(contentHTML);
+
     const formData = new FormData();
     formData.append("title", titleRef.current.value);
-    formData.append("content", contentRef.current.value);
-    formData.append("titleImg", imageRef.current.files[0]);
+    formData.append("content", contentHTML);
+    formData.append("titleImg", titleImgSrc);
 
-    // 비밀글일 경우 secreteKey 추가
     if (isSecret) {
       if (!secretPassword.trim()) {
         alert("비밀글 비밀번호를 입력해주세요");
@@ -30,6 +59,7 @@ export default function WritePost() {
       });
       alert("게시글이 등록되었습니다!");
       console.log(res.data);
+      navigate("/post");
     } catch (err) {
       console.error(err);
       alert("게시글 등록 실패");
@@ -40,7 +70,6 @@ export default function WritePost() {
     <div className="max-w-3xl mx-auto p-8 bg-white shadow-2xl rounded-2xl mt-10">
       <h2 className="text-2xl font-bold mb-8">게시글 작성</h2>
 
-      {/* 제목 */}
       <div className="mb-4">
         <label className="block font-semibold mb-2">제목</label>
         <input
@@ -51,24 +80,20 @@ export default function WritePost() {
         />
       </div>
 
-      {/* 대표 이미지 */}
-      <div className="mb-4">
-        <label className="block font-semibold mb-2">대표 이미지</label>
-        <input type="file" accept="image/*" ref={imageRef} />
-      </div>
-
-      {/* 내용 */}
       <div className="mb-4">
         <label className="block font-semibold mb-2">내용</label>
-        <textarea
-          rows="8"
-          ref={contentRef}
-          className="w-full p-3 border rounded-lg focus:outline-none focus:ring focus:ring-gray-300"
-          placeholder="내용을 입력하세요"
-        ></textarea>
+        <Editor
+          ref={editorRef}
+          previewStyle="vertical"
+          height="400px"
+          initialEditType="wysiwyg"
+          useCommandShortcut={true}
+          hooks={{
+            addImageBlobHook: handleImageUpload,
+          }}
+        />
       </div>
 
-      {/* 비밀글 옵션 */}
       <div className="flex items-center mb-4">
         <input
           type="checkbox"
@@ -82,7 +107,6 @@ export default function WritePost() {
         </label>
       </div>
 
-      {/* 비밀번호 입력 */}
       {isSecret && (
         <div className="mb-4">
           <label className="block font-semibold mb-2">비밀번호</label>

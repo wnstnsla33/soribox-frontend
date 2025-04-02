@@ -8,6 +8,7 @@ export default function useChatSocket({ roomId, user }) {
 
   useEffect(() => {
     if (!user) return;
+
     const socket = new SockJS(`http://localhost:8080/ws-stomp`);
     const client = new Client({
       webSocketFactory: () => socket,
@@ -16,15 +17,13 @@ export default function useChatSocket({ roomId, user }) {
       onConnect: () => {
         console.log("🔗 STOMP 연결됨");
 
-        const subscription = client.subscribe(
-          `/sub/chat/room/${roomId}`,
-          (message) => {
-            const payload = JSON.parse(message.body);
-            setMessages((prev) => [...prev, payload]);
-          }
-        );
+        // 메시지 구독
+        client.subscribe(`/sub/chat/room/${roomId}`, (message) => {
+          const payload = JSON.parse(message.body);
+          setMessages((prev) => [...prev, payload]);
+        });
 
-        // 입장
+        // 입장 메시지 전송
         client.publish({
           destination: "/pub/chat/enter",
           body: JSON.stringify({
@@ -75,5 +74,5 @@ export default function useChatSocket({ roomId, user }) {
     });
   };
 
-  return { messages, sendMessage, leaveRoom };
+  return { messages, sendMessage, leaveRoom, setMessages };
 }

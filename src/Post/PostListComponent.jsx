@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import bookmark from "../img/bookmark.png";
 import noBookmark from "../img/noBookmark.png";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
+
 export default function PostListComponent({
   posts,
   userBookmarks,
@@ -12,27 +12,41 @@ export default function PostListComponent({
   const [showPopup, setShowPopup] = useState(false);
   const [password, setPassword] = useState("");
   const [selectedPostId, setSelectedPostId] = useState(null);
-  const navigater = useNavigate();
+  const navigate = useNavigate();
+
+  // ✅ 대표 이미지 추출 함수
+  const getFirstImageFromContent = (html) => {
+    if (!html) return "http://localhost:8080/uploads/classicImage/noimg.png";
+    const match = html.match(/<img[^>]+src=["']?([^>"']+)["']?[^>]*>/);
+    return match?.[1] || "http://localhost:8080/uploads/classicImage/noimg.png";
+  };
+
+  // ✅ 텍스트만 추출 (이미지 및 모든 태그 제거)
+  const getTextOnlyFromContent = (html) => {
+    if (!html) return "";
+    return html
+      .replace(/<img[^>]*>/g, "")
+      .replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  };
+
   const handleSecretPostClick = (postId) => {
     setSelectedPostId(postId);
     setShowPopup(true);
   };
 
   const handleConfirmPassword = async (postId) => {
-    console.log("입력한 비밀번호:", password);
     try {
       const res = await axios.post(
         `http://localhost:8080/post/secrete/${postId}`,
         { pwd: password },
         { withCredentials: true }
       );
-
-      // 성공적으로 데이터를 받으면 해당 게시글 상세 페이지로 이동
       setShowPopup(false);
       setPassword("");
-      navigater(`/post/${postId}`, { state: { post: res.data } });
+      navigate(`/post/${postId}`, { state: { post: res.data } });
     } catch (err) {
-      console.error("비밀번호 검증 실패:", err);
       alert("비밀번호가 틀렸습니다.");
     }
   };
@@ -40,6 +54,19 @@ export default function PostListComponent({
   const handleCancel = () => {
     setShowPopup(false);
     setPassword("");
+  };
+
+  const formatDate = (dateTime) => {
+    const date = new Date(dateTime);
+    return date.toLocaleString("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
   };
 
   return (
@@ -50,9 +77,27 @@ export default function PostListComponent({
             <div
               key={post.postId}
               onClick={() => handleSecretPostClick(post.postId)}
-              className="cursor-pointer bg-gray-200 rounded-2xl shadow-lg overflow-hidden relative hover:shadow-2xl transition flex items-center justify-center h-60"
+              className="cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden relative hover:shadow-2xl transition"
             >
-              <span className="text-gray-600 font-bold">🔒 비밀글</span>
+              <div className="relative h-60 bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-600 font-bold text-xl">
+                  🔒 비밀글
+                </span>
+              </div>
+              <div className="p-4">
+                <h3 className="text-lg font-bold mb-2 truncate">
+                  비밀글입니다
+                </h3>
+                <p className="text-sm text-gray-700 line-clamp-2">
+                  비밀번호를 입력하면 내용을 볼 수 있습니다.
+                </p>
+                <div className="flex justify-between text-sm text-gray-500 mt-2">
+                  <span className="truncate max-w-[50%]">
+                    {post.userNickName}
+                  </span>
+                  <span>조회수 {post.viewCount}</span>
+                </div>
+              </div>
             </div>
           ) : (
             <Link
@@ -61,36 +106,41 @@ export default function PostListComponent({
               state={{ post }}
             >
               <div className="bg-white rounded-2xl shadow-lg overflow-hidden relative hover:shadow-2xl transition">
-                {/* 대표 이미지 */}
+                {/* ✅ 대표 이미지 */}
+                {console.log(post)}
                 <div className="relative h-60">
                   <img
-                    src={`http://localhost:8080${post.titleImg}`}
+                    src={getFirstImageFromContent(post.content)}
                     alt={post.title}
                     className="w-full h-full object-cover"
                   />
-
-                  {/* 북마크 */}
                   <img
                     src={userBookmarks.has(post.postId) ? bookmark : noBookmark}
                     alt="북마크"
                     onClick={(e) => {
-                      e.preventDefault(); // 클릭해도 상세 페이지 이동 방지
+                      e.preventDefault();
                       ClickBookmark(post.postId);
                     }}
                     className="absolute top-2 right-2 w-8 h-8 cursor-pointer hover:scale-110 transition-transform"
                   />
                 </div>
 
-                {/* 제목 */}
+                {/* ✅ 본문 정보 */}
                 <div className="p-4">
                   <h3 className="text-lg font-bold mb-2 truncate">
-                    {post.title} + {post.bookmarkCount}
+                    {post.title}
                   </h3>
-
-                  {/* 작성자, 조회수 */}
-                  <div className="flex justify-between text-sm text-gray-500">
-                    <span>{post.userName}</span>
+                  <p className="text-sm text-gray-700 line-clamp-2">
+                    {getTextOnlyFromContent(post.content)}
+                  </p>
+                  <div className="flex justify-between text-sm text-gray-500 mt-2">
+                    <span className="truncate max-w-[50%]">
+                      {post.userNickName}
+                    </span>
                     <span>조회수 {post.viewCount}</span>
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    {formatDate(post.createDate)}
                   </div>
                 </div>
               </div>
@@ -99,9 +149,9 @@ export default function PostListComponent({
         )}
       </div>
 
-      {/* 비밀번호 입력 팝업 */}
+      {/* ✅ 비밀글 팝업 */}
       {showPopup && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center w-80">
             <h2 className="text-lg font-bold mb-4">비밀번호를 입력하세요</h2>
             <input

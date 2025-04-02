@@ -9,7 +9,7 @@ export default function UserModal({ user, onLogout, onClose }) {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold">내 정보</h2>
           <img
-            src={user.userImg}
+            src={`http://localhost:8080${user.userImg}`} // ← 여기!
             alt="유저 프로필"
             className="w-12 h-12 rounded-full object-cover border"
           />

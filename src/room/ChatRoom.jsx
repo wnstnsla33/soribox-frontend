@@ -17,8 +17,62 @@ export default function ChatRoom() {
   const [roomInfo, setRoomInfo] = useState(null);
   const chatBoxRef = useRef(null);
 
+  const { messages, sendMessage, leaveRoom, setMessages } = useChatSocket({
+    roomId,
+    user,
+  });
+
+  // 스크롤 항상 아래로
+  useEffect(() => {
+    chatBoxRef.current?.scrollTo({
+      top: chatBoxRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [messages]);
+
+  // 유저 정보 로딩
+  useEffect(() => {
+    dispatch(fetchUserInfo());
+  }, [dispatch]);
+
+  // 방 정보 조회 + 방 입장
+  useEffect(() => {
+    axios
+      .get(`http://localhost:8080/chatRoom/${roomId}`, {
+        withCredentials: true,
+      })
+      .then((res) => setRoomInfo(res.data))
+      .catch((err) => {
+        alert(err);
+        navigate("/rooms");
+      });
+  }, [roomId]);
+
+  // ✅ 이전 채팅 내역 불러오기
+  useEffect(() => {
+    axios
+      .get(`http://localhost:8080/chatRoom/${roomId}/messages`, {
+        withCredentials: true,
+      })
+      .then((res) => {
+        setMessages(res.data); // 초기 메시지 설정
+      })
+      .catch((err) => {
+        console.error("이전 메시지 불러오기 실패", err);
+      });
+  }, [roomId]);
+
+  const handleSend = () => {
+    sendMessage(input);
+    setInput("");
+  };
+
+  const handleExit = () => {
+    navigate("/");
+  };
+
   const handleLeaveRoom = async () => {
-    if (roomInfo.hostName == user.userName) {
+    if (roomInfo.hostName === user.userName) {
       const confirmDelete = window.confirm(
         "이 방은 삭제됩니다. 정말 나가시겠습니까?"
       );
@@ -39,43 +93,9 @@ export default function ChatRoom() {
     }
   };
 
-  useEffect(() => {
-    dispatch(fetchUserInfo());
-  }, [dispatch]);
-
-  useEffect(() => {
-    axios
-      .get(`http://localhost:8080/chatRoom/${roomId}`, {
-        withCredentials: true,
-      })
-      .then((res) => setRoomInfo(res.data))
-      .catch((err) => {
-        alert(err);
-        navigate("/rooms");
-      });
-  }, [roomId]);
-
-  const { messages, sendMessage, leaveRoom } = useChatSocket({ roomId, user });
-
-  useEffect(() => {
-    chatBoxRef.current?.scrollTo({
-      top: chatBoxRef.current.scrollHeight,
-      behavior: "smooth",
-    });
-  }, [messages]);
-
-  const handleSend = () => {
-    sendMessage(input);
-    setInput("");
-  };
-
-  const handleExit = () => {
-    navigate("/");
-  };
-
   return (
     <div className="chat-room-wrapper styled-theme">
-      <div className="room-info-panel">
+      <div className="room-info-panel scrollable-info">
         <h3>{roomInfo?.roomTitle}</h3>
         <p>
           <strong>방장:</strong> {roomInfo?.hostName}
@@ -84,12 +104,14 @@ export default function ChatRoom() {
           <strong>참여 인원:</strong> {roomInfo?.curPaticipants} /{" "}
           {roomInfo?.maxParticipants}
         </p>
-        <p>
-          <strong>설명:</strong> {roomInfo?.roomContent}
-        </p>
+
         <p>
           <strong>유형:</strong> {roomInfo?.roomType}
         </p>
+        <div
+          className="room-description scrollable-info"
+          dangerouslySetInnerHTML={{ __html: roomInfo?.roomContent || "" }}
+        ></div>
       </div>
 
       <div className="chat-room-container">
@@ -102,6 +124,7 @@ export default function ChatRoom() {
             방 탈퇴
           </button>
         </div>
+
         <div className="chat-box" ref={chatBoxRef}>
           {messages.map((msg, idx) => (
             <ChatMessage
@@ -111,6 +134,7 @@ export default function ChatRoom() {
             />
           ))}
         </div>
+
         <div className="chat-input-wrap">
           <input
             autoFocus

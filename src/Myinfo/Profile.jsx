@@ -10,7 +10,7 @@ export default function Profile() {
     <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-2xl shadow-lg">
       <div className="flex items-center gap-6">
         <img
-          src={user.userImg}
+          src={`http://localhost:8080${user.userImg}`} // ← 여기!
           alt="유저 프로필 이미지"
           className="w-32 h-32 rounded-full object-cover border"
         />

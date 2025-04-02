@@ -11,14 +11,14 @@ export default function Menu({ onClose }) {
             게시판 글 목록
           </li>
         </Link>
-        <Link to={`/post/myPost`} onClick={onClose}>
+        <Link to={`/myRooms`} onClick={onClose}>
           <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer">
-            내글 보기
+            가입한 방 목록
           </li>
         </Link>
-        <Link to={`/post/myBookmark`} onClick={onClose}>
+        <Link to={`/post/myPost`} onClick={onClose}>
           <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer">
-            나의 북마크크
+            내 게시판글 보기
           </li>
         </Link>
       </ul>

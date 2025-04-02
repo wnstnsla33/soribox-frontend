@@ -22,15 +22,14 @@ export default function HeaderButtons({
   return (
     <div className="relative flex gap-4 justify-end items-center">
       {userInfo && (
-        <Link to="/createRoom">
-          <button>글쓰기</button>
+        <Link to="/">
+          <button>Main</button>
         </Link>
       )}
-
-      {userInfo ? (
-        <button onClick={infoOpen}>내 정보</button>
-      ) : (
-        <button onClick={toggleLogin}>로그인</button>
+      {userInfo && (
+        <Link to="/createRoom">
+          <button>Write</button>
+        </Link>
       )}
 
       {isLoginOpen && (
@@ -43,9 +42,19 @@ export default function HeaderButtons({
       {IsFindpwdOpen && <FindPwdModal onClose={findpwd} />}
 
       <div className="relative">
-        <button onClick={toggleMenu}>메뉴 ▼</button>
+        <button onClick={toggleMenu}>Menu ▼</button>
         {isMenuOpen && <Menu onClose={toggleMenu} />}
       </div>
+      {userInfo ? (
+        <button
+          className="border border-black text-black px-4 py-1 rounded-full hover:bg-purple-600 hover:text-black transition"
+          onClick={infoOpen}
+        >
+          Info
+        </button>
+      ) : (
+        <button onClick={toggleLogin}>Login</button>
+      )}
     </div>
   );
 }
