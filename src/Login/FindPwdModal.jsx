@@ -31,7 +31,7 @@ export default function FindPwdModal({ onClose }) {
           withCredentials: true, // 쿠키 전달용
         }
       );
-      setResult(res.data); // 성공 시 결과 출력
+      setResult(res.data.data); // 성공 시 결과 출력
     } catch (err) {
       setError(err.response?.data || "비밀번호 찾기 실패");
     }

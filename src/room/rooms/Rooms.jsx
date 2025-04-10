@@ -31,10 +31,10 @@ export default function Rooms() {
         withCredentials: true,
       });
       console.log(res);
-      setRooms(res.data.content);
-      setTotalPages(res.data.totalPages);
+      setRooms(res.data.data.content);
+      setTotalPages(res.data.data.totalPages);
     } catch (err) {
-      console.error("방 목록 불러오기 실패", err);
+      alert(err.response.message);
     }
   };
 
@@ -50,8 +50,7 @@ export default function Rooms() {
       .then(() => navigate(`/room/${roomId}`))
       .catch((err) => {
         console.log(err);
-        alert(err.response?.data || "입장 중 오류 발생");
-        navigate("/rooms");
+        alert(err.response?.data.message || "입장 중 오류 발생");
       });
   };
 

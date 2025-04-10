@@ -22,10 +22,7 @@ export default function ValidEmail({ isValid, ref }) {
         withCredentials: true,
       })
       .then((res) => {
-        if (res.data.success) {
-          setSendCode(true);
-          alert("이메일을 확인하세요");
-        }
+        alert("이메일을 확인하세요");
       })
       .catch((error) => {
         alert(error);
@@ -40,10 +37,8 @@ export default function ValidEmail({ isValid, ref }) {
         { withCredentials: true }
       )
       .then((res) => {
-        if (res.data.success) {
-          setIsVerified(true);
-          isValid(); // 부모에 인증 완료 전달
-        }
+        setIsVerified(true);
+        isValid(); // 부모에 인증 완료 전달
       })
       .catch((error) => {
         console.error("인증 코드 확인 실패:", error);

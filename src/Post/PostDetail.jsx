@@ -1,63 +1,74 @@
-import { useLocation, useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import bookmark from "../img/bookmark.png";
-import noBookmark from "../img/noBookmark.png";
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import Reply from "../reply/Reply";
 import { fetchUserInfo } from "../store/userSlice";
+import Reply from "../reply/Reply";
+import "react-toastify/dist/ReactToastify.css";
+import bookmark from "../img/bookmark.png";
+import noBookmark from "../img/noBookmark.png";
+import ReportButton from "../report/ReportButton";
+import dayjs from "dayjs";
 export default function PostDetail() {
-  const location = useLocation();
+  const formatDateTime = (dateString) =>
+    dayjs(dateString).format("YYYY-MM-DD HH:mm");
+
   const { postId } = useParams();
   const navigate = useNavigate();
   const user = useSelector((state) => state.user.userInfo);
+  const dispatch = useDispatch();
 
   const [post, setPost] = useState(null);
   const [replies, setReplies] = useState([]);
   const [newReply, setNewReply] = useState("");
   const [password, setPassword] = useState("");
   const [showPasswordPopup, setShowPasswordPopup] = useState(false);
-  const dispatch = useDispatch();
+
+  // 🔄 댓글 최신화 함수
+  const fetchReplies = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/post/${postId}/reply`,
+        { withCredentials: true }
+      );
+      setReplies(res.data.data);
+    } catch (err) {
+      console.error("댓글 불러오기 실패:", err);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (!user) {
-          await dispatch(fetchUserInfo()).unwrap(); // ✅ user 정보를 반드시 먼저 가져오기
+        if (!user || !user.userId) {
+          try {
+            await dispatch(fetchUserInfo()).unwrap();
+          } catch {
+            // 비회원일 수 있으니 무시
+          }
         }
-        console.log(post);
-        // 그 후 게시글 가져오기
+
         const res = await axios.get(`http://localhost:8080/post/${postId}`, {
           withCredentials: true,
         });
 
-        if (res.data.title === "비밀글") {
+        if (res.data.data.title === "비밀글") {
           setShowPasswordPopup(true);
         } else {
-          setPost(res.data);
-        }
-
-        // 댓글 가져오기 (비밀글 제외)
-        if (post?.title !== "비밀글") {
-          const replyRes = await axios.get(
-            `http://localhost:8080/post/${postId}/reply`,
-            {
-              withCredentials: true,
-            }
-          );
-          setReplies(replyRes.data);
+          setPost(res.data.data);
+          fetchReplies();
         }
       } catch (err) {
-        console.error("데이터 불러오기 실패:", err);
+        alert(err.response.data.message);
+        navigate("/");
       }
     };
 
     fetchData();
   }, [postId, dispatch]);
 
-  // 비밀번호 검증 요청
   const handlePasswordSubmit = async () => {
     try {
       const res = await axios.post(
@@ -65,10 +76,10 @@ export default function PostDetail() {
         { pwd: password },
         { withCredentials: true }
       );
-      setPost(res.data);
+      setPost(res.data.data);
       setShowPasswordPopup(false);
-    } catch (err) {
-      console.error("비밀번호 검증 실패:", err);
+      fetchReplies();
+    } catch {
       alert("비밀번호가 틀렸습니다.");
     }
   };
@@ -83,60 +94,46 @@ export default function PostDetail() {
           alert("삭제되었습니다.");
           navigate("/post");
         })
-        .catch((err) => {
-          console.error(err);
-          alert("삭제 실패");
-        });
+        .catch(() => alert("삭제 실패"));
     }
   };
+
   const toggleBookmark = () => {
     axios
       .post(`http://localhost:8080/post/bookmark/${postId}`, null, {
         withCredentials: true,
       })
       .then((res) => {
-        const isBookmarked = res.data.bookmarked;
-        const postBookmarkCount = res.data.postBookmarkCount;
-        setPost((prevPost) => ({
-          ...prevPost,
-          bookmarked: isBookmarked,
-          bookmarkCount: postBookmarkCount,
+        setPost((prev) => ({
+          ...prev,
+          bookmarked: res.data.data.bookmarked,
+          bookmarkCount: res.data.data.postBookmarkCount,
         }));
-
-        // ✅ 토스트 메시지
-        if (isBookmarked) {
-          toast.success("북마크에 추가되었습니다!");
-        } else {
-          toast.info("북마크에서 해제되었습니다.");
-        }
+        toast.success(
+          res.data.data.bookmarked ? "북마크에 추가됨" : "북마크 해제됨"
+        );
       })
-      .catch((err) => {
-        console.log(err.response?.data || err);
-        toast.error("북마크 처리 중 오류가 발생했습니다.");
-      });
+      .catch((res) => toast.error(res.response.data.message));
   };
+
   const handleNewReplySubmit = () => {
-    if (!newReply.trim()) {
-      alert("댓글을 입력하세요.");
-      return;
-    }
+    if (!newReply.trim()) return alert("댓글을 입력하세요.");
     axios
       .post(
         `http://localhost:8080/post/${postId}/reply`,
         { content: newReply },
         { withCredentials: true }
       )
-      .then((res) => {
-        setReplies((prevReplies) => [res.data, ...prevReplies]);
-        setNewReply(""); // 댓글 작성 후 입력 필드 비우기
-        toast.success("댓글이 작성되었습니다.");
+      .then(() => {
+        setNewReply("");
+        fetchReplies();
+        toast.success("댓글 작성됨");
       })
       .catch((err) => {
-        console.error("댓글 작성 실패:", err);
-        toast.error("댓글 작성 중 오류가 발생했습니다.");
+        console.error(err);
+        toast.error(err.response?.data?.message || "댓글 작성 중 오류 발생");
       });
   };
-  // 비밀번호 입력 팝업
 
   if (showPasswordPopup) {
     return (
@@ -147,19 +144,19 @@ export default function PostDetail() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2 border border-gray-300 rounded-md"
             placeholder="비밀번호 입력"
           />
           <div className="flex justify-center gap-4 mt-4">
             <button
               onClick={handlePasswordSubmit}
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
             >
               확인
             </button>
             <button
               onClick={() => navigate("/post")}
-              className="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400 transition"
+              className="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400"
             >
               취소
             </button>
@@ -168,67 +165,66 @@ export default function PostDetail() {
       </div>
     );
   }
+
   if (!post) return <div>Loading...</div>;
+
   return (
     <div className="relative min-h-screen bg-gray-50 p-8">
-      {/* 게시글 내용 */}
       <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8">
-        {/* 상단 제목, 북마크 */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">{post.title}</h1>
           <div className="flex items-center gap-4">
-            <span className="text-lg text-gray-700">
-              북마크 {post.bookmarkCount}
-            </span>
+            <span>북마크 {post.bookmarkCount}</span>
             <img
-              onClick={toggleBookmark}
               src={post.bookmarked ? bookmark : noBookmark}
               alt="북마크"
-              className="w-10 h-10 cursor-pointer hover:scale-110 transition-transform"
+              onClick={toggleBookmark}
+              className="w-10 h-10 cursor-pointer"
             />
             <ToastContainer position="top-center" autoClose={2000} />
           </div>
         </div>
 
-        {/* 작성일 */}
         <div className="text-sm text-gray-500 mb-2">
-          작성일: {post.createDate}
+          작성일: {formatDateTime(post.createDate)}
         </div>
 
-        {/* 작성자 / 조회수 */}
-        <div className="flex justify-between text-gray-500 text-sm mb-4">
-          <span>작성자: {post.userName}</span>
+        <div className="flex justify-between text-sm text-gray-500 mb-4">
+          <span>작성자: {post.userNickName}</span>
           <span>조회수: {post.viewCount}</span>
         </div>
 
-        {/* 내용 */}
         <div
           className="text-lg mb-8 leading-relaxed"
           dangerouslySetInnerHTML={{ __html: post.content }}
         ></div>
 
-        {/* 수정일 */}
-        <div className="text-sm text-gray-500">수정일: {post.modifiedDate}</div>
+        <div className="flex justify-between items-center text-sm text-gray-500">
+          <div>수정일: {formatDateTime(post.modifiedDate)}</div>
+          <ReportButton
+            targetId={post.postId.toString()}
+            targetType="POST"
+            reportedUserId={null}
+          />
+        </div>
       </div>
 
-      {/* 수정 / 삭제 버튼 - 우측 하단 고정 */}
-      {user?.userName === post.userName && (
+      {user?.userId === post.userId && (
         <div className="fixed bottom-10 right-10 flex gap-4">
           <Link to={`/post/edit/${post.postId}`} state={{ post }}>
-            <button className="px-6 py-3 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600">
+            <button className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
               수정하기
             </button>
           </Link>
           <button
             onClick={handleDelete}
-            className="px-6 py-3 bg-red-500 text-white rounded-lg shadow hover:bg-red-600"
+            className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600"
           >
             삭제하기
           </button>
         </div>
       )}
 
-      {/* 댓글 입력 */}
       <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8 mt-8">
         <h2 className="text-2xl font-bold mb-4">댓글</h2>
         <div className="flex items-center gap-4 mb-4">
@@ -246,10 +242,14 @@ export default function PostDetail() {
           </button>
         </div>
 
-        {/* 댓글 목록 */}
         {replies.length > 0 ? (
           replies.map((reply) => (
-            <Reply key={reply.id} reply={reply} postId={postId} />
+            <Reply
+              key={reply.replyId}
+              reply={reply}
+              postId={postId}
+              onRefresh={fetchReplies}
+            />
           ))
         ) : (
           <p>댓글이 없습니다.</p>

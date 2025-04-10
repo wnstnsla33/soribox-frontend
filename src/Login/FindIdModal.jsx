@@ -43,7 +43,7 @@ export default function FindIdModal({ onClose }) {
           withCredentials: true, // 쿠키 전달용
         }
       );
-      setResult(res.data); // 성공 시 아이디 출력
+      setResult(res.data.data); // 성공 시 아이디 출력
     } catch (err) {
       setError(err.response?.data || "아이디 찾기 실패");
     }

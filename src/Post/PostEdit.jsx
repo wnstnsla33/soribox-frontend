@@ -1,7 +1,9 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
+import { Editor } from "@toast-ui/react-editor";
+import "@toast-ui/editor/dist/toastui-editor.css";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function PostEdit() {
@@ -10,13 +12,35 @@ export default function PostEdit() {
   const post = location.state?.post;
 
   const [title, setTitle] = useState(post?.title || "");
-  const [content, setContent] = useState(post?.content || "");
+  const editorRef = useRef(null);
 
+  // ✅ 이미지 업로드 처리
+  const handleImageUpload = async (blob, callback) => {
+    const formData = new FormData();
+    formData.append("image", blob);
+    try {
+      const res = await axios.post(
+        "http://localhost:8080/post/image",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          withCredentials: true,
+        }
+      );
+      const fullUrl = "http://localhost:8080" + res.data.data;
+      callback(fullUrl, "이미지");
+    } catch (err) {
+      alert("이미지 업로드 실패:", err.response.data.message);
+    }
+  };
+
+  // ✅ 수정 저장
   const handleSave = () => {
+    const contentHTML = editorRef.current.getInstance().getHTML();
     axios
       .put(
         `http://localhost:8080/post/${post.postId}`,
-        { title, content },
+        { title, content: contentHTML },
         { withCredentials: true }
       )
       .then(() => {
@@ -48,11 +72,14 @@ export default function PostEdit() {
 
         <div className="mb-6">
           <label className="block text-lg mb-2">내용</label>
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows="10"
-            className="w-full p-4 border rounded-lg resize-none"
+          <Editor
+            ref={editorRef}
+            previewStyle="vertical"
+            height="400px"
+            initialEditType="wysiwyg"
+            useCommandShortcut={true}
+            initialValue={post?.content || ""}
+            hooks={{ addImageBlobHook: handleImageUpload }}
           />
         </div>
 

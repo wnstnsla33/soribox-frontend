@@ -1,21 +1,25 @@
 import React from "react";
 import "./ChatRoom.css";
-
-export default function ChatMessage({ msg, isMine }) {
-  if (msg.type === "ENTER" || msg.type === "QUIT") {
-    return <div className="system-message">{msg.message}</div>;
+import ChatProfileMenu from "./ChatProfileMenu";
+export default function ChatMessage({ chat, isMine }) {
+  if (chat.type === "ENTER" || chat.type === "QUIT") {
+    return <div className="system-message">{chat.message}</div>;
   }
 
   return (
     <div className={`chat-message-wrapper ${isMine ? "my" : "other"}`}>
-      <img
-        src={msg.profileImageUrl || "/default-profile.png"}
-        className="chat-profile-image"
+      {/* ✅ 분리된 프로필 메뉴 */}
+      <ChatProfileMenu
+        userImg={chat.userImg}
+        senderName={chat.senderName}
+        userId={chat.userId}
+        chatId={chat.chatId}
       />
+
       <div className="chat-message-content">
-        <div className="chat-sender-name">{msg.senderName}</div>
+        <div className="chat-sender-name">{chat.senderName}</div>
         <div className={`chat-message ${isMine ? "my" : "other"}`}>
-          {msg.message}
+          {chat.message}
         </div>
       </div>
     </div>

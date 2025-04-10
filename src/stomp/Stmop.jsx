@@ -11,13 +11,9 @@ export default function Stomp() {
     const socket = new SockJS("http://localhost:8080/ws-stomp");
     const client = new Client({
       webSocketFactory: () => socket,
-      debug: (str) => {
-        console.log("[STOMP DEBUG]", str);
-      },
+      debug: (str) => {},
       reconnectDelay: 5000,
       onConnect: () => {
-        console.log("✅ STOMP 연결됨");
-
         // ✅ 채팅방 구독
 
         // ✅ 테스트 메시지 전송
@@ -31,9 +27,7 @@ export default function Stomp() {
           }),
         });
       },
-      onStompError: (frame) => {
-        console.error("❌ STOMP 에러", frame);
-      },
+      onStompError: (frame) => {},
     });
 
     client.activate();
@@ -42,7 +36,6 @@ export default function Stomp() {
     return () => {
       if (clientRef.current && clientRef.current.connected) {
         clientRef.current.deactivate();
-        console.log("🔌 STOMP 연결 해제됨");
       }
     };
   }, []);

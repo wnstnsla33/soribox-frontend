@@ -20,12 +20,17 @@ export default function CreateRoom() {
     sigungu: "",
     dong: "",
     meetingTime: new Date(),
+    secretePassword: "",
   });
-  const [roomSaveImg, setRoomSaveImg] = useState(null); // 대표 이미지
+
+  const [roomSaveImg, setRoomSaveImg] = useState(null);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleFileChange = (e) => {
@@ -46,19 +51,19 @@ export default function CreateRoom() {
   };
 
   const handleImageUpload = async (blob, callback) => {
-    const formData = new FormData();
-    formData.append("image", blob);
+    const form = new FormData();
+    form.append("image", blob);
 
     try {
       const res = await axios.post(
         "http://localhost:8080/chatRoom/image",
-        formData,
+        form,
         {
           headers: { "Content-Type": "multipart/form-data" },
           withCredentials: true,
         }
       );
-      const imageUrl = "http://localhost:8080" + res.data;
+      const imageUrl = "http://localhost:8080" + res.data.data;
       callback(imageUrl, "대표 이미지");
     } catch (err) {
       console.error("이미지 업로드 실패:", err);
@@ -68,15 +73,13 @@ export default function CreateRoom() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.sido || !formData.sigungu) {
+    if (!formData.sido || !formData.sigungu)
       return alert("주소를 선택해주세요.");
-    }
-    if (!formData.roomType) {
-      return alert("방 타입을 하나 선택해주세요.");
-    }
-    if (formData.meetingTime <= new Date()) {
+    if (!formData.roomType) return alert("방 타입을 선택해주세요.");
+    if (formData.meetingTime <= new Date())
       return alert("약속 시간은 현재 시간보다 이후여야 합니다.");
-    }
+    if (formData.isPrivate && !formData.roomPassword)
+      return alert("비밀방 비밀번호를 입력해주세요.");
 
     const html = editorRef.current.getInstance().getHTML();
 
@@ -85,9 +88,16 @@ export default function CreateRoom() {
     fullForm.append("roomType", formData.roomType);
     fullForm.append("roomContent", html);
     fullForm.append("maxParticipants", formData.maxParticipants);
-    fullForm.append("meetingTime", formData.meetingTime.toISOString());
+    fullForm.append(
+      "meetingTime",
+      formData.meetingTime.toLocaleString("sv-SE").replace(" ", "T")
+    );
     fullForm.append("sido", formData.sido);
     fullForm.append("sigungu", formData.sigungu);
+    fullForm.append("isPrivate", formData.isPrivate);
+    if (formData.isPrivate) {
+      fullForm.append("secretePassword", formData.roomPassword);
+    }
     if (roomSaveImg) {
       fullForm.append("roomSaveImg", roomSaveImg);
     }
@@ -97,10 +107,11 @@ export default function CreateRoom() {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       });
-      navigate(`/room/${res.data.roomId}`);
+      alert(res.data.message);
+      navigate(`/room/${res.data.data.roomId}`);
     } catch (err) {
       console.error(err);
-      alert("방 생성 중 오류가 발생했습니다.");
+      alert(err.data.message);
     }
   };
 
@@ -108,6 +119,7 @@ export default function CreateRoom() {
     <div className="max-w-xl mx-auto p-6 bg-white rounded-xl shadow-md">
       <h2 className="text-2xl font-bold mb-6">방 만들기</h2>
       <form onSubmit={handleSubmit} className="space-y-5">
+        {/* 제목 */}
         <div>
           <label className="block mb-1 font-semibold">방 제목</label>
           <input
@@ -115,39 +127,36 @@ export default function CreateRoom() {
             value={formData.roomTitle}
             onChange={handleChange}
             required
-            className="w-full border p-3 rounded focus:outline-none"
+            className="w-full border p-3 rounded"
             placeholder="방 이름을 입력하세요"
           />
         </div>
 
+        {/* 방 타입 */}
         <RoomTypeSelector
           selectedType={formData.roomType}
           onChange={(type) =>
             setFormData((prev) => ({ ...prev, roomType: type }))
           }
         />
-        <div className="mb-5">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            대표 이미지
-          </label>
 
+        {/* 이미지 업로드 */}
+        <div>
+          <label className="block font-semibold mb-1">대표 이미지</label>
           <div className="flex items-center gap-4">
-            {/* 이미지 미리보기 */}
             {roomSaveImg ? (
               <img
                 src={URL.createObjectURL(roomSaveImg)}
                 alt="preview"
-                className="w-24 h-24 object-cover rounded border border-gray-300"
+                className="w-24 h-24 object-cover rounded border"
               />
             ) : (
               <div className="w-24 h-24 flex items-center justify-center border border-dashed border-gray-300 rounded text-gray-400 text-sm">
                 No Image
               </div>
             )}
-
-            {/* 파일 선택 */}
             <div>
-              <label className="inline-block bg-white border border-gray-300 px-4 py-2 text-sm rounded cursor-pointer hover:bg-gray-50">
+              <label className="inline-block bg-white border px-4 py-2 rounded cursor-pointer hover:bg-gray-50">
                 파일 선택
                 <input
                   type="file"
@@ -157,30 +166,28 @@ export default function CreateRoom() {
                 />
               </label>
               <p className="mt-2 text-xs text-gray-500">
-                {roomSaveImg
-                  ? roomSaveImg.name
-                  : "jpg, png 형식의 이미지를 업로드하세요"}
+                {roomSaveImg ? roomSaveImg.name : "jpg, png 파일 업로드"}
               </p>
             </div>
           </div>
         </div>
 
+        {/* 소개 */}
         <div>
-          <label className="block mb-1 font-semibold">방 소개</label>
+          <label className="block font-semibold mb-1">방 소개</label>
           <Editor
             ref={editorRef}
             previewStyle="vertical"
             height="300px"
             initialEditType="wysiwyg"
             useCommandShortcut={true}
-            hooks={{
-              addImageBlobHook: handleImageUpload,
-            }}
+            hooks={{ addImageBlobHook: handleImageUpload }}
           />
         </div>
 
+        {/* 인원 수 */}
         <div>
-          <label className="block mb-1 font-semibold">최대 인원</label>
+          <label className="block font-semibold mb-1">최대 인원</label>
           <input
             type="number"
             name="maxParticipants"
@@ -192,8 +199,9 @@ export default function CreateRoom() {
           />
         </div>
 
+        {/* 시간 */}
         <div>
-          <label className="block mb-1 font-semibold">약속 시간</label>
+          <label className="block font-semibold mb-1">약속 시간</label>
           <DatePicker
             selected={formData.meetingTime}
             onChange={(date) =>
@@ -207,13 +215,14 @@ export default function CreateRoom() {
           />
         </div>
 
+        {/* 지역 */}
         <div>
-          <label className="block mb-1 font-semibold">모임 지역</label>
+          <label className="block font-semibold mb-1">모임 지역</label>
           <div className="flex gap-2">
             <input
               type="text"
               readOnly
-              value={`${formData.sido} ${formData.sigungu} `}
+              value={`${formData.sido} ${formData.sigungu}`}
               className="flex-1 border p-3 rounded bg-gray-100"
             />
             <button
@@ -226,6 +235,37 @@ export default function CreateRoom() {
           </div>
         </div>
 
+        {/* 비밀방 체크 */}
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            id="isPrivate"
+            name="isPrivate"
+            checked={formData.isPrivate}
+            onChange={handleChange}
+            className="mr-2"
+          />
+          <label htmlFor="isPrivate" className="font-semibold">
+            비밀방
+          </label>
+        </div>
+
+        {/* 비밀번호 입력 */}
+        {formData.isPrivate && (
+          <div>
+            <label className="block font-semibold mb-1">비밀번호</label>
+            <input
+              type="password"
+              name="roomPassword"
+              value={formData.roomPassword}
+              onChange={handleChange}
+              className="w-full p-3 border rounded"
+              placeholder="비밀번호 입력"
+            />
+          </div>
+        )}
+
+        {/* 제출 */}
         <button
           type="submit"
           className="w-full bg-green-500 text-white py-3 rounded hover:bg-green-600"

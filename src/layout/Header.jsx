@@ -7,53 +7,40 @@ import HeaderButtons from "./HeaderButton";
 export default function Header() {
   const location = useLocation();
   const isMainPage = location.pathname === "/";
-
   const dispatch = useDispatch();
   const userInfo = useSelector((state) => state.user.userInfo);
-  const [isfindIdOpen, setIsFindidOpen] = useState(false);
-  const [isfindpwdOpen, setIsFindpwdOpen] = useState(false);
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
+
+  const [isWriteOpen, setIsWriteOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isInfoOpen, setIsInfoOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
 
-  const toggleLogin = () => {
-    setIsLoginOpen(!isLoginOpen);
+  const toggleWrite = () => {
+    setIsWriteOpen((prev) => !prev);
     setIsMenuOpen(false);
     setIsInfoOpen(false);
-    setIsFindidOpen(false);
-    setIsFindpwdOpen(false);
+    setIsLoginOpen(false);
   };
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-    setIsLoginOpen(false);
-    setIsInfoOpen(false);
-    setIsFindidOpen(false);
-    setIsFindpwdOpen(false);
-  };
-
-  const infoOpen = () => {
-    setIsInfoOpen(!isInfoOpen);
-    setIsLoginOpen(false);
-    setIsMenuOpen(false);
-    setIsFindidOpen(false);
-    setIsFindpwdOpen(false);
-  };
-
-  const findId = () => {
+    setIsMenuOpen((prev) => !prev);
+    setIsWriteOpen(false);
     setIsInfoOpen(false);
     setIsLoginOpen(false);
-    setIsMenuOpen(false);
-    setIsFindidOpen(!isfindIdOpen);
-    setIsFindpwdOpen(false);
   };
 
-  const findPwd = () => {
-    setIsInfoOpen(false);
-    setIsLoginOpen(false);
+  const toggleInfo = () => {
+    setIsInfoOpen((prev) => !prev);
+    setIsWriteOpen(false);
     setIsMenuOpen(false);
-    setIsFindidOpen(false);
-    setIsFindpwdOpen(!isfindpwdOpen);
+    setIsLoginOpen(false);
+  };
+
+  const toggleLogin = () => {
+    setIsLoginOpen((prev) => !prev);
+    setIsWriteOpen(false);
+    setIsMenuOpen(false);
+    setIsInfoOpen(false);
   };
 
   const handleLogout = async () => {
@@ -91,17 +78,19 @@ export default function Header() {
           <div className="flex items-center gap-4">
             <HeaderButtons
               userInfo={userInfo}
-              isLoginOpen={isLoginOpen}
-              isInfoOpen={isInfoOpen}
+              isWriteOpen={isWriteOpen}
               isMenuOpen={isMenuOpen}
-              isFindIdOpen={isfindIdOpen}
-              IsFindpwdOpen={isfindpwdOpen}
-              toggleLogin={toggleLogin}
-              infoOpen={infoOpen}
+              isInfoOpen={isInfoOpen}
+              isLoginOpen={isLoginOpen}
+              toggleWrite={toggleWrite}
               toggleMenu={toggleMenu}
+              toggleInfo={toggleInfo}
+              toggleLogin={toggleLogin}
               handleLogout={handleLogout}
-              findid={findId}
-              findpwd={findPwd}
+              setIsWriteOpen={setIsWriteOpen}
+              setIsMenuOpen={setIsMenuOpen}
+              setIsInfoOpen={setIsInfoOpen}
+              setIsLoginOpen={setIsLoginOpen}
             />
           </div>
         </div>

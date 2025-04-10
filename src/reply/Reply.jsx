@@ -1,44 +1,43 @@
 import axios from "axios";
 import { useState } from "react";
+import { useSelector } from "react-redux";
+import ReportButton from "../report/ReportButton";
+export default function Reply({ reply, postId, isChild = false, onRefresh }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [isReplying, setIsReplying] = useState(false);
+  const [showReplies, setShowReplies] = useState(false);
+  const [editedContent, setEditedContent] = useState(reply.content);
+  const [newReply, setNewReply] = useState("");
 
-export default function Reply({ reply, onDelete, postId }) {
-  const [isEditing, setIsEditing] = useState(false); // 수정 모드 여부
-  const [isReplying, setIsReplying] = useState(false); // 답글 입력 모드 여부
-  const [editedContent, setEditedContent] = useState(reply.content); // 수정할 댓글 내용
-  const [newReply, setNewReply] = useState(""); // 답글 내용
+  const user = useSelector((state) => state.user.userInfo);
+  const isAuthorized = user?.userId === reply.userId;
 
   const handleDelete = () => {
     if (window.confirm("정말 삭제하시겠습니까?")) {
       axios
-        .delete(`http://localhost:8080/reply/${reply.id}`, {
+        .delete(`http://localhost:8080/post/${postId}/${reply.replyId}`, {
           withCredentials: true,
         })
         .then(() => {
           alert("댓글이 삭제되었습니다.");
-          onDelete(reply.id); // 댓글 삭제 후 부모 컴포넌트에 알리기
+          onRefresh?.();
         })
         .catch((err) => console.error("댓글 삭제 실패:", err));
     }
   };
 
-  const handleEditChange = (e) => {
-    setEditedContent(e.target.value);
-  };
-
   const handleEditSubmit = () => {
-    if (!editedContent.trim()) {
-      alert("댓글 내용을 입력하세요.");
-      return;
-    }
+    if (!editedContent.trim()) return alert("댓글 내용을 입력하세요.");
     axios
       .put(
-        `http://localhost:8080/reply/${reply.id}`,
+        `http://localhost:8080/post/${reply.replyId}/reply`,
         { content: editedContent },
         { withCredentials: true }
       )
-      .then((res) => {
+      .then(() => {
         alert("댓글이 수정되었습니다.");
-        setIsEditing(false); // 수정 모드 종료
+        setIsEditing(false);
+        onRefresh?.();
       })
       .catch((err) => {
         console.error("댓글 수정 실패:", err);
@@ -46,25 +45,19 @@ export default function Reply({ reply, onDelete, postId }) {
       });
   };
 
-  const handleReplyChange = (e) => {
-    setNewReply(e.target.value);
-  };
-
   const handleReplySubmit = () => {
-    if (!newReply.trim()) {
-      alert("답글을 입력하세요.");
-      return;
-    }
+    if (!newReply.trim()) return alert("답글을 입력하세요.");
     axios
       .post(
-        `http://localhost:8080/post/${postId}/reply`, // 답글을 해당 댓글에 추가하는 엔드포인트
-        { content: newReply },
+        `http://localhost:8080/post/${postId}/reply`,
+        { content: newReply, parentReplyId: reply.replyId },
         { withCredentials: true }
       )
-      .then((res) => {
+      .then(() => {
         alert("답글이 작성되었습니다.");
-        setIsReplying(false); // 답글 입력 종료
-        setNewReply(""); // 입력 필드 초기화
+        setIsReplying(false);
+        setNewReply("");
+        onRefresh?.();
       })
       .catch((err) => {
         console.error("답글 작성 실패:", err);
@@ -73,71 +66,114 @@ export default function Reply({ reply, onDelete, postId }) {
   };
 
   return (
-    <div className="mb-4 border-b pb-4">
-      <div className="flex justify-between items-center">
-        <span className="font-semibold">{reply.userNickname}</span>
-        <span className="text-sm text-gray-500">{reply.createDate}</span>
+    <div className="mb-6 pb-3 text-sm">
+      {/* 👤 닉네임 / 날짜 + 버튼들 한 줄 정렬 */}
+      <div className="flex justify-between items-center text-xs text-gray-600 mb-1">
+        {/* 왼쪽: 닉네임 */}
+        <span className="font-semibold text-black">{reply.userNickname}</span>
+
+        {/* 오른쪽: 날짜 + 버튼들 */}
+        <div className="flex items-center gap-3">
+          <span className="text-gray-400">
+            {new Date(reply.createDate).toLocaleDateString("ko-KR")}
+          </span>
+
+          {!isChild && (
+            <button
+              onClick={() => setIsReplying(!isReplying)}
+              className="hover:underline"
+            >
+              답글
+            </button>
+          )}
+
+          {isAuthorized && (
+            <>
+              <button
+                onClick={() => setIsEditing(!isEditing)}
+                className="hover:underline"
+              >
+                수정
+              </button>
+              <button
+                onClick={handleDelete}
+                className="text-red-500 hover:underline"
+              >
+                삭제
+              </button>
+            </>
+          )}
+
+          {/* 🛡️ 신고 버튼 - 항상 노출 */}
+          <ReportButton
+            targetId={reply.replyId}
+            targetType="REPLY"
+            reportedUserId={reply.userId || null}
+          />
+        </div>
       </div>
 
-      {/* 댓글 내용 */}
+      {/* ✏️ 댓글 내용 or 수정 */}
       {!isEditing ? (
-        <p className="text-lg mt-2">{reply.content}</p>
+        <p className="text-gray-800 whitespace-pre-wrap">{reply.content}</p>
       ) : (
-        <div className="mt-2 flex items-center gap-2">
-          {/* 수정 입력란 */}
+        <div className="mt-1 flex items-start gap-2">
           <textarea
             value={editedContent}
-            onChange={handleEditChange}
-            className="w-3/4 p-2 border border-gray-300 rounded-md text-sm"
+            onChange={(e) => setEditedContent(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md text-sm"
             rows="3"
           />
           <button
             onClick={handleEditSubmit}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md"
+            className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm"
           >
-            수정 완료
+            완료
           </button>
         </div>
       )}
 
-      {/* 수정 / 삭제 버튼 */}
-      <div className="mt-2 text-sm text-gray-600">
-        <a
-          href="#!"
-          className="mr-4"
-          onClick={() => setIsReplying((prev) => !prev)} // 답글 입력 필드 토글
-        >
-          답글
-        </a>
-        <a
-          href="#!"
-          className="mr-4"
-          onClick={() => setIsEditing((prev) => !prev)} // 수정 모드 토글
-        >
-          수정
-        </a>
-        <a href="#!" onClick={handleDelete} className="text-red-500">
-          삭제
-        </a>
-      </div>
-
-      {/* 답글 입력 부분 */}
-      {isReplying && (
-        <div className="mt-4 flex items-center gap-2">
-          {/* 답글 입력란 */}
+      {/* 🧵 답글 작성 */}
+      {!isChild && isReplying && (
+        <div className="mt-2 flex items-start gap-2">
           <textarea
             value={newReply}
-            onChange={handleReplyChange}
+            onChange={(e) => setNewReply(e.target.value)}
             placeholder="답글을 작성하세요..."
-            className="w-3/4 p-2 border border-gray-300 rounded-md text-sm"
+            className="w-full p-2 border border-gray-300 rounded-md text-sm"
             rows="3"
           />
           <button
             onClick={handleReplySubmit}
-            className="px-4 py-2 bg-green-500 text-white rounded-md"
+            className="px-3 py-1 bg-green-500 text-white rounded-md text-sm"
           >
-            답글 작성
+            작성
           </button>
+        </div>
+      )}
+
+      {/* 👁️ 답글 보기 버튼 */}
+      {!isChild && reply.replys?.length > 0 && (
+        <button
+          onClick={() => setShowReplies((prev) => !prev)}
+          className="mt-2 text-blue-500 text-xs"
+        >
+          {showReplies ? "답글 숨기기" : `답글 보기 (${reply.replys.length})`}
+        </button>
+      )}
+
+      {/* 💬 대댓글 렌더링 */}
+      {showReplies && reply.replys?.length > 0 && (
+        <div className="ml-4 mt-3 border-l pl-4 border-gray-300">
+          {reply.replys.map((child) => (
+            <Reply
+              key={child.replyId}
+              reply={child}
+              postId={postId}
+              isChild={true}
+              onRefresh={onRefresh}
+            />
+          ))}
         </div>
       )}
     </div>

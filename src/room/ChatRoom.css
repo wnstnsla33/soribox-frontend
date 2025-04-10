@@ -5,7 +5,8 @@
   height: 85vh;
   margin: 40px auto;
   border-radius: 14px;
-  overflow: hidden;
+  /* overflow: hidden; ❌ 제거 또는 아래처럼 수정 */
+  overflow-x: hidden; /* ✅ 이렇게만 */
   background: linear-gradient(to bottom right, #fefefe, #e9f5f9);
   box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
   font-family: "Segoe UI", "Noto Sans KR", sans-serif;
@@ -14,10 +15,16 @@
 /* ===== 좌측 방 정보 패널 ===== */
 .room-info-panel {
   width: 70%;
+  display: flex;
+  flex-direction: column;
   background-color: #ffffff;
   padding: 24px;
   box-sizing: border-box;
   border-right: 1px solid #ddd;
+
+  /* ✅ 아래 추가 */
+  max-height: 85vh;
+  overflow-y: auto;
 }
 
 .room-info-panel h3 {
@@ -204,4 +211,30 @@
 
 .send-button:hover {
   background-color: #388e3c;
+}
+.room-content-wrapper {
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  padding: 1rem;
+  background: #fdfdfd;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-family: "Noto Sans KR", sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #222;
+  word-break: break-word;
+
+  /* 🔥 여긴 height 고정하지 말고 auto로 */
+  max-height: none;
+  flex-shrink: 0;
+}
+
+.room-content-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.room-content-wrapper::-webkit-scrollbar-thumb {
+  background-color: #bbb;
+  border-radius: 3px;
 }

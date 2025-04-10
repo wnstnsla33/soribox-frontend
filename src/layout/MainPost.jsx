@@ -11,12 +11,8 @@ export default function MainPost() {
         const postRes = await axios.get("http://localhost:8080/post/topView", {
           withCredentials: true,
         });
-        const bookmarkRes = await axios.get(
-          "http://localhost:8080/post/bookmarkList",
-          { withCredentials: true }
-        );
-        setTop10Post(postRes.data);
-        setUserBookmarks(new Set(bookmarkRes.data || []));
+
+        setTop10Post(postRes.data.data);
       } catch (err) {
         console.error("TopView 불러오기 실패:", err);
       }
@@ -31,11 +27,15 @@ export default function MainPost() {
         {},
         { withCredentials: true }
       );
-      const updatedPost = res.data;
+      const updatedPost = res.data.data;
       setTop10Post((prevPosts) =>
         prevPosts.map((post) =>
           post.postId === updatedPost.postId
-            ? { ...post, bookmarkCount: updatedPost.postBookmarkCount }
+            ? {
+                ...post,
+                bookmarkCount: updatedPost.postBookmarkCount,
+                bookmarked: updatedPost.bookmarked,
+              }
             : post
         )
       );

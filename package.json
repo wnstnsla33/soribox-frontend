@@ -11,6 +11,7 @@
     "@testing-library/user-event": "^13.5.0",
     "@toast-ui/react-editor": "^3.2.3",
     "axios": "^1.8.3",
+    "dayjs": "^1.11.13",
     "framer-motion": "^12.6.2",
     "react": "^19.0.0",
     "react-datepicker": "^8.2.1",

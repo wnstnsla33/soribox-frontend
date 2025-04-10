@@ -1,44 +1,15 @@
+// src/App.js
 import "./App.css";
-import SignUp from "./signup/SignUp";
+// 혹시 Tailwind 쓰면
+import "./index.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Header from "./layout/Header";
-import Profile from "./Myinfo/Profile";
-import ProfileEdit from "./Myinfo/ProfileEdit";
-import PostList from "./Post/Post";
-import WritePost from "./Post/WritePost";
-import PostDetail from "./Post/PostDetail";
-import PostEdit from "./Post/PostEdit";
-import MyPost from "./Post/filterPost/MyPost";
-import Stomp from "./stomp/Stmop";
-import CreateRoom from "./room/CreateRoom";
-import ChatRoom from "./room/ChatRoom";
-import MainPage from "./layout/MainPage";
-import MyRooms from "./room/MyRooms/MyRooms";
+import AdminRouter from "./Router/AdminRouter";
+import UserRouter from "./Router/UserRouter";
 const router = createBrowserRouter([
-  {
-    path: "/",
-    element: (
-      <div>
-        <Header />
-      </div>
-    ),
-    children: [
-      { path: "/signup", element: <SignUp /> },
-      { path: "/profile", element: <Profile /> },
-      { path: "/profileEdit", element: <ProfileEdit /> },
-      { path: "/post", element: <PostList /> },
-      { path: "/post/new", element: <WritePost /> },
-      { path: "/post/:postId", element: <PostDetail /> },
-      { path: "/post/edit/:postId", element: <PostEdit /> },
-      { path: "/post/myPost", element: <MyPost /> },
-      { path: "/stomp", element: <Stomp /> },
-      { path: "/createRoom", element: <CreateRoom /> },
-      { path: "/", element: <MainPage /> },
-      { path: "/room/:roomId", element: <ChatRoom /> },
-      { path: "/myRooms", element: <MyRooms /> },
-    ],
-  },
+  ...UserRouter, // 일반 사용자용
+  ...AdminRouter, // 관리자 전용
 ]);
+
 function App() {
   return <RouterProvider router={router} />;
 }

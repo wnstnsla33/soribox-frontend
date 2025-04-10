@@ -16,7 +16,7 @@ export default function MyRooms() {
             withCredentials: true,
           }
         );
-        setMyRooms(res.data || []);
+        setMyRooms(res.data.data || []);
       } catch (err) {
         console.error("방 목록 불러오기 실패", err);
         setMyRooms([]);

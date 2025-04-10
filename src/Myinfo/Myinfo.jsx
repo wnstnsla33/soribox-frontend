@@ -42,6 +42,12 @@ export default function UserModal({ user, onLogout, onClose }) {
           <Link to="profileEdit" className="hover:underline" onClick={onClose}>
             정보 수정
           </Link>
+          <Link to={`/myRooms`} onClick={onClose}>
+            가입한 방 목록
+          </Link>
+          <Link to={`/post/myPost`} onClick={onClose}>
+            내 게시판글 보기
+          </Link>
         </div>
 
         <button

@@ -31,7 +31,7 @@ export default function ProfileEdit() {
           withCredentials: true,
         }
       );
-      dispatch(fetchUserInfo(res.data));
+      dispatch(fetchUserInfo(res.data.data));
       alert("프로필이 성공적으로 수정되었습니다.");
       navigate("/profile");
     } catch (err) {

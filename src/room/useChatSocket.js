@@ -13,10 +13,7 @@ export default function useChatSocket({ roomId, user }) {
     const client = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000,
-      debug: (str) => console.log(str),
       onConnect: () => {
-        console.log("🔗 STOMP 연결됨");
-
         // 메시지 구독
         client.subscribe(`/sub/chat/room/${roomId}`, (message) => {
           const payload = JSON.parse(message.body);
@@ -30,6 +27,7 @@ export default function useChatSocket({ roomId, user }) {
             type: "ENTER",
             roomId,
             senderName: user.userName,
+            userImg: user.userImg || user.profileImagePath, // ✅ 여기 추가
             message: `${user.userName} 님이 입장하셨습니다.`,
           }),
         });
@@ -55,6 +53,7 @@ export default function useChatSocket({ roomId, user }) {
         type: "QUIT",
         roomId,
         senderName: user.userName,
+        userImg: user.userImg || user.profileImagePath, // ✅ 여기도 추가
         message: `${user.userName} 님이 방을 떠났습니다.`,
       }),
     });
@@ -69,6 +68,7 @@ export default function useChatSocket({ roomId, user }) {
         type: "TALK",
         roomId,
         senderName: user.userName,
+        userImg: user.userImg || user.profileImagePath, // ✅ 메시지에도 포함
         message,
       }),
     });

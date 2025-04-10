@@ -1,28 +1,20 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-export default function usePostData(showBookmarksOnly, sortType) {
+export default function usePostData(showBookmarksOnly, sortType, keyword) {
   const [posts, setPosts] = useState([]);
-  const [userBookmarks, setUserBookmarks] = useState(new Set());
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   const fetchData = async (pageNum) => {
     try {
       const url = showBookmarksOnly
-        ? `http://localhost:8080/post/mybookmark?page=${pageNum}&sortType=${sortType}`
-        : `http://localhost:8080/post?page=${pageNum}&sortType=${sortType}`;
-      console.log(url);
+        ? `http://localhost:8080/post/mybookmark?page=${pageNum}&sortType=${sortType}&keyword=${keyword}`
+        : `http://localhost:8080/post?page=${pageNum}&sortType=${sortType}&keyword=${keyword}`;
       const postRes = await axios.get(url, { withCredentials: true });
-      const bookmarkRes = await axios.get(
-        "http://localhost:8080/post/bookmarkList",
-        {
-          withCredentials: true,
-        }
-      );
-      setPosts(postRes.data.posts || []);
-      setTotalPages(Math.ceil(postRes.data.postCount / 10) || 1);
-      setUserBookmarks(new Set(bookmarkRes.data || []));
+      setPosts(postRes.data.data.posts || []);
+      setTotalPages(Math.ceil(postRes.data.data.postCount) || 1);
+      console.log(postRes);
     } catch (err) {
       console.error("불러오기 실패:", err);
     }
@@ -35,21 +27,19 @@ export default function usePostData(showBookmarksOnly, sortType) {
         {},
         { withCredentials: true }
       );
-      const updatedPost = res.data;
+      const updatedPost = res.data.data;
 
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
           post.postId === updatedPost.postId
-            ? { ...post, bookmarkCount: updatedPost.postBookmarkCount }
+            ? {
+                ...post,
+                bookmarkCount: updatedPost.postBookmarkCount,
+                bookmarked: updatedPost.bookmarked,
+              }
             : post
         )
       );
-
-      setUserBookmarks((prev) => {
-        const updated = new Set(prev);
-        updatedPost.bookmarked ? updated.add(postId) : updated.delete(postId);
-        return updated;
-      });
     } catch (err) {
       console.error("북마크 실패:", err);
     }
@@ -57,7 +47,7 @@ export default function usePostData(showBookmarksOnly, sortType) {
 
   useEffect(() => {
     fetchData(page);
-  }, [page, showBookmarksOnly, sortType]); // showBookmarksOnly 바뀔 때마다 다시 불러옴
+  }, [page, showBookmarksOnly, sortType, keyword]);
 
   const nextPage = () => {
     setPage((prev) => (prev < totalPages ? prev + 1 : prev));
@@ -69,11 +59,11 @@ export default function usePostData(showBookmarksOnly, sortType) {
 
   return {
     posts,
-    userBookmarks,
     toggleBookmark,
     page,
     totalPages,
     nextPage,
     prevPage,
+    setPage, // keyword 바뀔 때 page 1로 리셋할 때 사용
   };
 }

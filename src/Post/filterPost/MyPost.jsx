@@ -11,7 +11,7 @@ export default function MyPost() {
       const res = await axios.get(`http://localhost:8080/post/myPost`, {
         withCredentials: true,
       });
-      setPosts(res.data || []);
+      setPosts(res.data.data || []);
       console.log(res);
     } catch (err) {
       console.log(err);

@@ -28,10 +28,10 @@ export default function WritePost() {
           withCredentials: true,
         }
       );
-      const fullUrl = "http://localhost:8080" + res.data;
+      const fullUrl = "http://localhost:8080" + res.data.data;
       callback(fullUrl, "이미지");
     } catch (err) {
-      console.error("이미지 업로드 실패:", err);
+      alert("이미지 업로드 실패:", err.response.data.message);
     }
   };
 
@@ -57,12 +57,11 @@ export default function WritePost() {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       });
-      alert("게시글이 등록되었습니다!");
-      console.log(res.data);
+      alert(res.data.message);
       navigate("/post");
     } catch (err) {
-      console.error(err);
-      alert("게시글 등록 실패");
+      alert(err.response.data.message);
+      navigate("/");
     }
   };
 

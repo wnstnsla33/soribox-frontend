@@ -25,7 +25,7 @@ export const fetchUserInfo = createAsyncThunk(
       const res = await axios.get("http://localhost:8080/user", {
         withCredentials: true,
       });
-      return res.data;
+      return res.data.data;
     } catch (err) {
       const status = err.response?.status;
 
@@ -51,8 +51,9 @@ export const fetchUserInfo = createAsyncThunk(
           // window.location.href = "/"; // or dispatch(logout())
           return rejectWithValue("refresh expired");
         }
+      } else {
+        return err;
       }
-
       return rejectWithValue(status);
     }
   }
@@ -63,7 +64,7 @@ export const logout = createAsyncThunk("user/logout", async () => {
   await axios
     .post("http://localhost:8080/auth/logout", {}, { withCredentials: true })
     .then((res) => {
-      alert(res.data);
+      alert(res.data.message);
       fetchUserInfo();
     });
   return null;

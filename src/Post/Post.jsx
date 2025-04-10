@@ -4,23 +4,29 @@ import PostListComponent from "./PostListComponent";
 
 export default function Post() {
   const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
-  const [sortType, setSortType] = useState(1); // 기본 추천순
+  const [sortType, setSortType] = useState(1);
+  const [keyword, setKeyword] = useState("");
 
   const {
     posts,
-    userBookmarks,
     toggleBookmark,
     page,
     totalPages,
     nextPage,
     prevPage,
-  } = usePostData(showBookmarksOnly, sortType); // sortType도 넘길 수 있도록 설계하면 좋아요
+    setPage,
+  } = usePostData(showBookmarksOnly, sortType, keyword);
+
+  const handleKeywordChange = (e) => {
+    setKeyword(e.target.value);
+    setPage(1); // 키워드 변경 시 페이지 초기화
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
-      {/* 북마크 토글 */}
-      <div className="flex items-center justify-between mb-6">
-        {/* 토글 스위치 */}
+      {/* 상단 필터바 */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+        {/* 북마크 토글 */}
         <div className="flex items-center gap-3">
           <label className="relative inline-flex items-center cursor-pointer">
             <input
@@ -41,7 +47,15 @@ export default function Post() {
           </span>
         </div>
 
-        {/* 정렬 필터 */}
+        {/* 검색 입력 */}
+        <input
+          type="text"
+          placeholder="검색어 입력"
+          value={keyword}
+          onChange={handleKeywordChange}
+          className="border rounded px-3 py-2 w-full sm:w-64"
+        />
+
         {/* 정렬 필터 */}
         <div className="flex space-x-3">
           <button
@@ -76,13 +90,9 @@ export default function Post() {
           </button>
         </div>
       </div>
-      {console.log(posts)}
+
       {/* 게시글 리스트 */}
-      <PostListComponent
-        posts={posts}
-        userBookmarks={userBookmarks}
-        ClickBookmark={toggleBookmark}
-      />
+      <PostListComponent posts={posts} ClickBookmark={toggleBookmark} />
 
       {/* 페이지네이션 */}
       <div className="flex justify-center space-x-4 mt-8">

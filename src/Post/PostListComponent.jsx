@@ -4,24 +4,18 @@ import bookmark from "../img/bookmark.png";
 import noBookmark from "../img/noBookmark.png";
 import axios from "axios";
 
-export default function PostListComponent({
-  posts,
-  userBookmarks,
-  ClickBookmark,
-}) {
+export default function PostListComponent({ posts, ClickBookmark }) {
   const [showPopup, setShowPopup] = useState(false);
   const [password, setPassword] = useState("");
   const [selectedPostId, setSelectedPostId] = useState(null);
   const navigate = useNavigate();
 
-  // ✅ 대표 이미지 추출 함수
   const getFirstImageFromContent = (html) => {
     if (!html) return "http://localhost:8080/uploads/classicImage/noimg.png";
     const match = html.match(/<img[^>]+src=["']?([^>"']+)["']?[^>]*>/);
     return match?.[1] || "http://localhost:8080/uploads/classicImage/noimg.png";
   };
 
-  // ✅ 텍스트만 추출 (이미지 및 모든 태그 제거)
   const getTextOnlyFromContent = (html) => {
     if (!html) return "";
     return html
@@ -45,7 +39,7 @@ export default function PostListComponent({
       );
       setShowPopup(false);
       setPassword("");
-      navigate(`/post/${postId}`, { state: { post: res.data } });
+      navigate(`/post/${postId}`, { state: { post: res.data.data } });
     } catch (err) {
       alert("비밀번호가 틀렸습니다.");
     }
@@ -106,26 +100,28 @@ export default function PostListComponent({
               state={{ post }}
             >
               <div className="bg-white rounded-2xl shadow-lg overflow-hidden relative hover:shadow-2xl transition">
-                {/* ✅ 대표 이미지 */}
-                {console.log(post)}
                 <div className="relative h-60">
                   <img
                     src={getFirstImageFromContent(post.content)}
                     alt={post.title}
                     className="w-full h-full object-cover"
                   />
-                  <img
-                    src={userBookmarks.has(post.postId) ? bookmark : noBookmark}
-                    alt="북마크"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      ClickBookmark(post.postId);
-                    }}
-                    className="absolute top-2 right-2 w-8 h-8 cursor-pointer hover:scale-110 transition-transform"
-                  />
+                  <div className="absolute top-2 right-2 flex items-center gap-1">
+                    <img
+                      src={post.bookmarked ? bookmark : noBookmark}
+                      alt="북마크"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        ClickBookmark(post.postId);
+                      }}
+                      className="w-8 h-8 cursor-pointer hover:scale-110 transition-transform"
+                    />
+                    <span className="text-sm text-white bg-black bg-opacity-50 rounded px-2 py-0.5">
+                      {post.bookmarkCount}
+                    </span>
+                  </div>
                 </div>
 
-                {/* ✅ 본문 정보 */}
                 <div className="p-4">
                   <h3 className="text-lg font-bold mb-2 truncate">
                     {post.title}
@@ -149,7 +145,7 @@ export default function PostListComponent({
         )}
       </div>
 
-      {/* ✅ 비밀글 팝업 */}
+      {/* 비밀글 팝업 */}
       {showPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center w-80">

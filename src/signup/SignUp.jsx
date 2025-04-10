@@ -104,11 +104,11 @@ export default function SignUp() {
         withCredentials: true,
       })
       .then((res) => {
-        alert(res.data);
+        alert(res.data.data);
         navigate("/");
       })
       .catch((err) => {
-        const msg = err?.response?.data || "회원가입 중 오류 발생";
+        const msg = err?.response?.data.data || "회원가입 중 오류 발생";
         setGlobalError(msg); // ← 전역 에러 메시지 설정
       });
   };
