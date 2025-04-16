@@ -18,13 +18,27 @@ export default function RoomCard({ room, onClick }) {
   if (isPrivate) {
     return (
       <div
-        className="w-full transition-transform duration-200 ease-in-out transform hover:scale-105 bg-gradient-to-r from-gray-800 to-gray-700 text-white border-gray-600 shadow-md rounded-xl p-6 border relative hover:shadow-lg cursor-pointer"
+        className="w-full min-h-[240px] transition-transform duration-200 ease-in-out transform hover:scale-105 bg-white text-black border-gray-200 shadow-md rounded-xl p-6 border relative hover:shadow-lg cursor-pointer"
         onClick={handleClick}
       >
-        <div className="flex items-center justify-center h-full min-h-[100px]">
-          <span className="text-sm bg-gray-900 text-white px-3 py-1 rounded-full shadow-lg">
+        {/* 우측 고정 이미지 */}
+        <div className="absolute top-6 right-6 w-24 h-24">
+          <img
+            src={`http://localhost:8080/uploads/classicImage/privateRoom.png`}
+            alt="private room"
+            className="w-full h-full object-cover rounded-lg border"
+          />
+        </div>
+
+        {/* 텍스트 영역 */}
+        <div className="pr-36">
+          <h3 className="text-xl font-bold mb-1 truncate">
             🔒 {room.roomTitle}
-          </span>
+          </h3>
+          <p className="text-sm text-red-500 mb-1">비밀방입니다.</p>
+          {room.hostName && (
+            <p className="text-sm text-gray-700">방장: {room.hostName}</p>
+          )}
         </div>
       </div>
     );

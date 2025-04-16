@@ -1,8 +1,12 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Menu from "./Menu";
 import UserModal from "../Myinfo/Myinfo";
 import LoginModal from "../Login/LoginModal";
+import FindIdModal from "../Login/FindIdModal";
+import FindPwdModal from "../Login/FindPwdModal";
+import FriendRequestPopup from "../friends/FriendRequestPopup";
+import FriendListPopup from "../friends/FriendListPopup"; // ✅ 친구 목록 팝업 추가
 
 export default function HeaderButtons({
   userInfo,
@@ -25,6 +29,11 @@ export default function HeaderButtons({
   const infoRef = useRef(null);
   const loginRef = useRef(null);
 
+  const [showFindId, setShowFindId] = useState(false);
+  const [showFindPwd, setShowFindPwd] = useState(false);
+  const [showFriendPopup, setShowFriendPopup] = useState(false);
+  const [showFriendListPopup, setShowFriendListPopup] = useState(false); // ✅ 친구 목록 상태
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -37,40 +46,86 @@ export default function HeaderButtons({
         setIsMenuOpen(false);
         setIsInfoOpen(false);
         setIsLoginOpen(false);
+        setShowFindId(false);
+        setShowFindPwd(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const openFindId = () => {
+    toggleLogin();
+    setShowFindId(true);
+    setShowFindPwd(false);
+  };
+
+  const openFindPwd = () => {
+    toggleLogin();
+    setShowFindPwd(true);
+    setShowFindId(false);
+  };
+
   return (
     <div className="relative flex gap-4 justify-end items-center">
-      {/* 항상 보이는 Main 버튼 */}
       <Link to="/">
         <button>Main</button>
       </Link>
 
-      {/* 항상 보이는 Menu 버튼 */}
       <div className="relative" ref={menuRef}>
         <button onClick={toggleMenu}>Menu ▼</button>
-        {isMenuOpen && <Menu onClose={() => setIsMenuOpen(false)} />}
+        {isMenuOpen && (
+          <Menu
+            onClose={() => setIsMenuOpen(false)}
+            onFriendPopupOpen={() => setShowFriendPopup(true)}
+          />
+        )}
       </div>
 
-      {/* 로그인 안 된 경우에만 Login 버튼 및 모달 */}
       {!userInfo && (
-        <div ref={loginRef}>
+        <div ref={loginRef} className="relative">
           <button onClick={toggleLogin}>Login</button>
-          {isLoginOpen && (
-            <LoginModal
-              onClose={toggleLogin}
-              findid={() => console.log("아이디 찾기")}
-              findpwd={() => console.log("비밀번호 찾기")}
-            />
+
+          {(isLoginOpen || showFindId || showFindPwd) && (
+            <div className="absolute top-full right-0 z-50">
+              {isLoginOpen && (
+                <LoginModal
+                  onClose={() => {
+                    toggleLogin();
+                    setShowFindId(false);
+                    setShowFindPwd(false);
+                  }}
+                  findid={() => {
+                    setIsLoginOpen(false);
+                    setShowFindId(true);
+                  }}
+                  findpwd={() => {
+                    setIsLoginOpen(false);
+                    setShowFindPwd(true);
+                  }}
+                />
+              )}
+              {showFindId && (
+                <FindIdModal
+                  onClose={() => {
+                    setShowFindId(false);
+                    setIsLoginOpen(true);
+                  }}
+                />
+              )}
+              {showFindPwd && (
+                <FindPwdModal
+                  onClose={() => {
+                    setShowFindPwd(false);
+                    setIsLoginOpen(true);
+                  }}
+                />
+              )}
+            </div>
           )}
         </div>
       )}
 
-      {/* 로그인 된 경우에만 Write, Info */}
       {userInfo && (
         <>
           <div className="relative" ref={writeRef}>
@@ -78,7 +133,12 @@ export default function HeaderButtons({
             {isWriteOpen && (
               <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg z-50">
                 <ul className="py-2">
-                  <Link to="/createRoom" onClick={() => setIsWriteOpen(false)}>
+                  <Link
+                    to="/createRoom"
+                    onClick={() => {
+                      setIsWriteOpen(false);
+                    }}
+                  >
                     <li className="px-4 py-2 hover:bg-gray-200">방 만들기</li>
                   </Link>
                   <Link to="/post/new" onClick={() => setIsWriteOpen(false)}>
@@ -91,7 +151,7 @@ export default function HeaderButtons({
 
           <div ref={infoRef}>
             <button
-              className="border border-black text-black px-4 py-1 rounded-full hover:bg-purple-600 hover:text-black transition"
+              className="border border-black text-black px-4 py-1 rounded-full hover:bg-purple-600 hover:text-white transition"
               onClick={toggleInfo}
             >
               Info
@@ -101,10 +161,18 @@ export default function HeaderButtons({
                 onClose={() => setIsInfoOpen(false)}
                 user={userInfo}
                 onLogout={handleLogout}
+                onFriendListOpen={() => setShowFriendListPopup(true)} // ✅ 여기 추가
               />
             )}
           </div>
         </>
+      )}
+
+      {showFriendPopup && (
+        <FriendRequestPopup onClose={() => setShowFriendPopup(false)} />
+      )}
+      {showFriendListPopup && (
+        <FriendListPopup onClose={() => setShowFriendListPopup(false)} />
       )}
     </div>
   );

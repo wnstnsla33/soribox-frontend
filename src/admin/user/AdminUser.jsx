@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import UserContextMenu from "./UserContextMenu";
+import MessageModal from "./MessageModal";
 
 export default function AdminUser() {
   const [users, setUsers] = useState([]);
@@ -10,14 +11,18 @@ export default function AdminUser() {
   const [contextMenu, setContextMenu] = useState(null);
   const contextRef = useRef(null);
 
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageTargetUser, setMessageTargetUser] = useState(null);
+
   const fetchUsers = async () => {
     try {
       const res = await axios.get("http://localhost:8080/admin/user", {
         params: { page, name: keyword },
         withCredentials: true,
       });
-      setUsers(res.data.data);
-      setTotalPages(res.data.pages);
+      console.log(res);
+      setUsers(res.data.data.data);
+      setTotalPages(res.data.data.pages);
     } catch (error) {
       console.error("유저 목록 불러오기 실패", error);
     }
@@ -27,7 +32,6 @@ export default function AdminUser() {
     fetchUsers();
   }, [page, keyword]);
 
-  // 외부 클릭 감지
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (contextRef.current && !contextRef.current.contains(e.target)) {
@@ -47,6 +51,12 @@ export default function AdminUser() {
       x: e.pageX,
       y: e.pageY,
     });
+  };
+
+  const openMessageModal = (targetUser) => {
+    setMessageTargetUser(targetUser);
+    setShowMessageModal(true);
+    setContextMenu(null); // 메뉴 닫기
   };
 
   const closeContextMenu = () => setContextMenu(null);
@@ -73,6 +83,7 @@ export default function AdminUser() {
               <th className="px-4 py-2 border">등급</th>
               <th className="px-4 py-2 border">레벨</th>
               <th className="px-4 py-2 border">최근 로그인</th>
+              <th className="px-4 py-2 border">신고 횟수</th> {/* ✅ 추가 */}
             </tr>
           </thead>
           <tbody>
@@ -89,6 +100,9 @@ export default function AdminUser() {
                 <td className="px-4 py-2 border">{user.userLevel}</td>
                 <td className="px-4 py-2 border">
                   {new Date(user.recentLoginTime).toLocaleString()}
+                </td>
+                <td className="px-4 py-2 border text-red-500 font-semibold">
+                  {user.reportCount || 0}회
                 </td>
               </tr>
             ))}
@@ -119,8 +133,16 @@ export default function AdminUser() {
             x={contextMenu.x}
             y={contextMenu.y}
             onClose={closeContextMenu}
+            onSendMessage={() => openMessageModal(contextMenu.user)} // ✅ 추가
           />
         </div>
+      )}
+
+      {showMessageModal && messageTargetUser && (
+        <MessageModal
+          toUser={messageTargetUser}
+          onClose={() => setShowMessageModal(false)}
+        />
       )}
     </div>
   );

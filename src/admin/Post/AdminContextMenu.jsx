@@ -18,11 +18,10 @@ export default function AdminContextMenu({
         `http://localhost:8080/admin/post/${postId}`,
         { withCredentials: true }
       );
-      alert(res.data); // 서버 응답 메시지
+      alert(res.data.message); // 서버 응답 메시지
       onDeleteSuccess(); // 부모 컴포넌트에서 목록 다시 불러오게
     } catch (err) {
-      console.error("삭제 실패", err);
-      alert("게시글 삭제 중 오류가 발생했습니다.");
+      alert(err.response.data.message);
     }
   };
 

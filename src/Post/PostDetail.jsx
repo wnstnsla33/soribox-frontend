@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchUserInfo } from "../store/userSlice";
@@ -10,11 +10,13 @@ import "react-toastify/dist/ReactToastify.css";
 import bookmark from "../img/bookmark.png";
 import noBookmark from "../img/noBookmark.png";
 import ReportButton from "../report/ReportButton";
+import UserProfilePopup from "../layout/UserProfiePopup";
 import dayjs from "dayjs";
+
 export default function PostDetail() {
   const formatDateTime = (dateString) =>
     dayjs(dateString).format("YYYY-MM-DD HH:mm");
-
+  const [showUserPopup, setShowUserPopup] = useState(false);
   const { postId } = useParams();
   const navigate = useNavigate();
   const user = useSelector((state) => state.user.userInfo);
@@ -26,7 +28,6 @@ export default function PostDetail() {
   const [password, setPassword] = useState("");
   const [showPasswordPopup, setShowPasswordPopup] = useState(false);
 
-  // 🔄 댓글 최신화 함수
   const fetchReplies = async () => {
     try {
       const res = await axios.get(
@@ -181,7 +182,6 @@ export default function PostDetail() {
               onClick={toggleBookmark}
               className="w-10 h-10 cursor-pointer"
             />
-            <ToastContainer position="top-center" autoClose={2000} />
           </div>
         </div>
 
@@ -190,7 +190,15 @@ export default function PostDetail() {
         </div>
 
         <div className="flex justify-between text-sm text-gray-500 mb-4">
-          <span>작성자: {post.userNickName}</span>
+          <div className="flex items-center gap-2">
+            <span>작성자:</span>
+            <UserProfilePopup
+              userId={post.userId}
+              userNickname={post.userNickName}
+              userImg={post.userImg || "/default-profile.png"}
+            />
+            <span className="font-semibold">{post.userNickName}</span>
+          </div>
           <span>조회수: {post.viewCount}</span>
         </div>
 

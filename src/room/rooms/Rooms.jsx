@@ -5,6 +5,7 @@ import { locationData } from "./LocationData";
 import RoomPagination from "./RoomPagination";
 import RoomCard from "./RoomCard";
 import RoomCategoryFilter from "../RoomCategoryFilter";
+
 export default function Rooms() {
   const [rooms, setRooms] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -12,46 +13,46 @@ export default function Rooms() {
   const [location, setLocation] = useState({ sido: "", sigungu: "" });
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [useNearby, setUseNearby] = useState(false); // ✅ 스위치 상태
   const navigate = useNavigate();
+
   const handlePageChange = (page) => {
     if (page >= 0 && page < totalPages) {
       setCurrentPage(page);
     }
   };
+
   const fetchRooms = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/chatRoom/search", {
+      const url = useNearby
+        ? "http://localhost:8080/chatRoom/search/near"
+        : "http://localhost:8080/chatRoom/search";
+
+      const res = await axios.get(url, {
         params: {
           title: searchQuery,
           roomType: selectedCategory,
           page: currentPage,
-          sido: location.sido,
-          sigungu: location.sigungu,
+          ...(useNearby
+            ? {}
+            : { sido: location.sido, sigungu: location.sigungu }),
         },
         withCredentials: true,
       });
-      console.log(res);
+
       setRooms(res.data.data.content);
       setTotalPages(res.data.data.totalPages);
     } catch (err) {
-      alert(err.response.message);
+      alert(err.response?.data?.message || "방 불러오기 실패");
     }
   };
 
   useEffect(() => {
     fetchRooms();
-  }, [searchQuery, selectedCategory, location, currentPage]);
+  }, [searchQuery, selectedCategory, location, currentPage, useNearby]);
 
   const enterRoom = (roomId) => {
-    axios
-      .get(`http://localhost:8080/chatRoom/${roomId}`, {
-        withCredentials: true,
-      })
-      .then(() => navigate(`/room/${roomId}`))
-      .catch((err) => {
-        console.log(err);
-        alert(err.response?.data.message || "입장 중 오류 발생");
-      });
+    navigate(`/room/${roomId}`);
   };
 
   const handleSidoChange = (e) => {
@@ -74,7 +75,7 @@ export default function Rooms() {
         }}
       />
 
-      {/* 🔍 검색창 + 지역 필터 */}
+      {/* 🔍 검색창 + 지역 필터 + 내 근처 스위치 */}
       <div className="max-w-5xl mx-auto mb-6 flex flex-col md:flex-row items-center gap-4">
         <input
           type="text"
@@ -87,34 +88,52 @@ export default function Rooms() {
           }}
         />
 
-        <div className="flex gap-2 w-full md:w-auto">
-          <select
-            value={location.sido}
-            onChange={handleSidoChange}
-            className="border border-gray-300 rounded px-3 py-2 text-sm w-36"
-          >
-            <option value="">시/도 선택</option>
-            {Object.keys(locationData).map((sido) => (
-              <option key={sido} value={sido}>
-                {sido}
-              </option>
-            ))}
-          </select>
+        <div className="flex gap-2 w-full md:w-auto items-center">
+          {!useNearby && (
+            <>
+              <select
+                value={location.sido}
+                onChange={handleSidoChange}
+                className="border border-gray-300 rounded px-3 py-2 text-sm w-36"
+              >
+                <option value="">시/도 선택</option>
+                {Object.keys(locationData).map((sido) => (
+                  <option key={sido} value={sido}>
+                    {sido}
+                  </option>
+                ))}
+              </select>
 
-          <select
-            value={location.sigungu}
-            onChange={handleSigunguChange}
-            disabled={!location.sido}
-            className="border border-gray-300 rounded px-3 py-2 text-sm w-36 disabled:bg-gray-100"
-          >
-            <option value="">시/군/구 선택</option>
-            {location.sido &&
-              locationData[location.sido]?.map((sigungu) => (
-                <option key={sigungu} value={sigungu}>
-                  {sigungu}
-                </option>
-              ))}
-          </select>
+              <select
+                value={location.sigungu}
+                onChange={handleSigunguChange}
+                disabled={!location.sido}
+                className="border border-gray-300 rounded px-3 py-2 text-sm w-36 disabled:bg-gray-100"
+              >
+                <option value="">시/군/구 선택</option>
+                {location.sido &&
+                  locationData[location.sido]?.map((sigungu) => (
+                    <option key={sigungu} value={sigungu}>
+                      {sigungu}
+                    </option>
+                  ))}
+              </select>
+            </>
+          )}
+
+          {/* ✅ 내 근처 스위치 */}
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <input
+              type="checkbox"
+              checked={useNearby}
+              onChange={() => {
+                setUseNearby((prev) => !prev);
+                setCurrentPage(0);
+              }}
+              className="w-4 h-4"
+            />
+            내 근처 보기
+          </label>
         </div>
       </div>
 

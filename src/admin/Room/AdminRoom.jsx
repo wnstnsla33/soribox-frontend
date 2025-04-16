@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import AdminRoomContextMenu from "./AdminRoomContextMenu";
 import RoomMemberAvatars from "./RoomMemberAvatar";
+import { useNavigate } from "react-router-dom";
+
 export default function AdminRoom() {
   const [rooms, setRooms] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [contextMenu, setContextMenu] = useState(null); // {x, y, room}
+  const navigate = useNavigate();
 
   const fetchRooms = async () => {
     try {
@@ -18,7 +21,7 @@ export default function AdminRoom() {
       setRooms(res.data.data);
       setTotalPages(res.data.pages);
     } catch (error) {
-      console.error("방 목록 불러오기 실패", error);
+      alert(error.response.data.message);
     }
   };
 
@@ -29,16 +32,23 @@ export default function AdminRoom() {
   const handleDelete = async (roomId) => {
     const confirmed = window.confirm(`해당 채팅방을 삭제할까요?`);
     if (!confirmed) return;
+
     try {
-      await axios.delete(`http://localhost:8080/admin/room/${roomId}`, {
-        withCredentials: true,
-      });
-      alert("삭제되었습니다.");
+      const res = await axios.delete(
+        `http://localhost:8080/admin/room/${roomId}`,
+        {
+          withCredentials: true,
+        }
+      );
+      alert(res.data?.message);
       fetchRooms();
     } catch (error) {
-      console.error("방 삭제 실패", error);
-      alert("삭제 중 오류 발생");
+      alert(error.response?.data?.message);
     }
+  };
+
+  const handleView = (room) => {
+    navigate(`/room/${room.roomId}`);
   };
 
   const handleContextMenu = (e, room) => {
@@ -79,11 +89,10 @@ export default function AdminRoom() {
             {rooms.map((room) => (
               <tr
                 key={room.roomId}
+                onClick={() => handleView(room)} // ✅ 클릭 시 상세 이동
                 onContextMenu={(e) => handleContextMenu(e, room)}
-                className="hover:bg-gray-50 transition-colors"
+                className="hover:bg-gray-50 transition-colors cursor-pointer"
               >
-                {console.log(room)}
-
                 <td className="px-4 py-2 border">
                   {room.private && (
                     <span className="ml-2 text-red-500">🔒</span>

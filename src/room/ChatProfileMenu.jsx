@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import ReportModal from "../report/ReportModal";
-
+import UserInfoPopup from "../friends/UserInfoPopup";
 export default function ChatProfileMenu({
   userImg,
   senderName,
@@ -11,6 +11,7 @@ export default function ChatProfileMenu({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [showUserInfo, setShowUserInfo] = useState(false); // ✅ 유저정보 팝업 상태
   const menuRef = useRef();
 
   useEffect(() => {
@@ -28,7 +29,7 @@ export default function ChatProfileMenu({
   };
 
   const handleInfo = () => {
-    alert(`닉네임: ${senderName}`);
+    setShowUserInfo(true); // ✅ 팝업 열기
     setMenuOpen(false);
   };
 
@@ -63,6 +64,7 @@ export default function ChatProfileMenu({
         </div>
       )}
 
+      {/* ✅ 신고 모달 */}
       <ReportModal
         isOpen={reportOpen}
         onClose={() => setReportOpen(false)}
@@ -70,6 +72,11 @@ export default function ChatProfileMenu({
         targetType="CHAT"
         reportedUserId={userId}
       />
+
+      {/* ✅ 유저 정보 팝업 */}
+      {showUserInfo && (
+        <UserInfoPopup userId={userId} onClose={() => setShowUserInfo(false)} />
+      )}
     </div>
   );
 }

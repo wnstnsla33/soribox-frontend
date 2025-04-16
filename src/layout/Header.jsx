@@ -3,13 +3,14 @@ import { Outlet, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUserInfo, logout } from "../store/userSlice";
 import HeaderButtons from "./HeaderButton";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Header() {
   const location = useLocation();
   const isMainPage = location.pathname === "/";
   const dispatch = useDispatch();
   const userInfo = useSelector((state) => state.user.userInfo);
-
   const [isWriteOpen, setIsWriteOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isInfoOpen, setIsInfoOpen] = useState(false);
@@ -53,8 +54,11 @@ export default function Header() {
   };
 
   useEffect(() => {
-    dispatch(fetchUserInfo());
-  }, [dispatch]);
+    if (!userInfo) {
+      dispatch(fetchUserInfo());
+      console.log("페칭");
+    }
+  }, []);
 
   return (
     <>
@@ -96,6 +100,10 @@ export default function Header() {
         </div>
       </header>
 
+      {/* ✅ 전역에서 toast를 쓸 수 있도록 여기에만 한 번 넣는다 */}
+      <ToastContainer position="top-right" autoClose={2000} />
+
+      {/* ✅ 하위 페이지들 */}
       <Outlet />
     </>
   );

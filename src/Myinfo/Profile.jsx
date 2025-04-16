@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
@@ -6,7 +5,6 @@ import { Link } from "react-router-dom";
 import DeleteConfirmModal from "./DeleteConfirmModal";
 
 export default function Profile() {
-  const navigate = useNavigate();
   const user = useSelector((state) => state.user.userInfo);
 
   const isSNS =

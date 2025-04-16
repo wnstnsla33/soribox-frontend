@@ -25,6 +25,7 @@ export const fetchUserInfo = createAsyncThunk(
       const res = await axios.get("http://localhost:8080/user", {
         withCredentials: true,
       });
+      console.log(res);
       return res.data.data;
     } catch (err) {
       const status = err.response?.status;
@@ -51,8 +52,6 @@ export const fetchUserInfo = createAsyncThunk(
           // window.location.href = "/"; // or dispatch(logout())
           return rejectWithValue("refresh expired");
         }
-      } else {
-        return err;
       }
       return rejectWithValue(status);
     }

@@ -7,7 +7,7 @@ import ChatMessage from "./ChatMessage";
 import axios from "axios";
 import "./ChatRoom.css";
 import ReportButton from "../report/ReportButton";
-
+import UserProfilePopup from "../layout/UserProfiePopup";
 export default function ChatRoom() {
   const { roomId } = useParams();
   const navigate = useNavigate();
@@ -15,45 +15,52 @@ export default function ChatRoom() {
   const user = useSelector((state) => state.user.userInfo);
 
   const [input, setInput] = useState("");
-  const [roomInfo, setRoomInfo] = useState(null);
+  const [roomWithChat, setRoomWithChat] = useState(null);
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const chatBoxRef = useRef(null);
+  const handleEnterUser = (newUser) => {
+    setRoomWithChat((prev) => {
+      if (!prev || !newUser) return prev;
 
-  // ✅ user가 있을 때만 hook 실행
+      const exists = prev.roomData.roomMembers?.some(
+        (m) => m.userId === newUser.userId
+      );
+      if (exists) return prev;
+
+      return {
+        ...prev,
+        roomData: {
+          ...prev.roomData,
+          roomMembers: [...(prev.roomData.roomMembers || []), newUser],
+          curPaticipants: prev.roomData.curPaticipants + 1,
+        },
+      };
+    });
+  };
+
   const { messages, sendMessage, leaveRoom, setMessages } = useChatSocket(
-    user ? { roomId, user } : { roomId, user: null }
+    user
+      ? { roomId, user, onUserEnter: handleEnterUser }
+      : { roomId, user: null }
   );
 
-  const fetchRoomInfo = async () => {
+  const fetchRoomWithChat = async () => {
     try {
       const res = await axios.get(`http://localhost:8080/chatRoom/${roomId}`, {
         withCredentials: true,
       });
-      const room = res.data.data;
-
-      if (room.private && !room.roomContent) {
+      const data = res.data.data;
+      if (data.roomData.private && !data.roomData.roomContent) {
         setShowPasswordPrompt(true);
       } else {
-        setRoomInfo(room);
+        setRoomWithChat(data);
+        setMessages(data.messages);
       }
     } catch (err) {
-      console.log(err);
-      alert(err.response.data.message);
+      alert(err.response?.data?.message || "방 조회 실패");
       navigate("/");
-    }
-  };
-
-  const fetchMessages = async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:8080/chatRoom/${roomId}/messages`,
-        { withCredentials: true }
-      );
-      setMessages(res.data.data);
-    } catch (err) {
-      alert(err.response.data.message);
     }
   };
 
@@ -64,42 +71,31 @@ export default function ChatRoom() {
         { password: passwordInput },
         { withCredentials: true }
       );
-      if (res.status === 200) {
-        setShowPasswordPrompt(false);
-        setRoomInfo(res.data.data);
-        await fetchMessages();
-      }
+
+      // ✅ 백엔드에서 바로 내려주는 값 세팅
+      setRoomWithChat(res.data.data);
+      setMessages(res.data.data.messages); // 소켓 메시지 초기화
+      setShowPasswordPrompt(false); // 비밀번호 창 닫기
     } catch (err) {
       setErrorMessage(err.response?.data.message || "비밀번호 확인 실패");
     }
   };
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const result = await dispatch(fetchUserInfo()).unwrap();
-        console.log("🟢 유저 정보 불러오기 성공:", result);
-      } catch (err) {
-        console.log("🔥 fetchUserInfo 에러:", err); // <- 여기에 뜬다!
-        console.log(err);
-        // err는 rejectWithValue()로 전달한 값임
+    const init = async () => {
+      if (!user) {
+        try {
+          const result = await dispatch(fetchUserInfo()).unwrap();
+        } catch (err) {
+          navigate("/");
+          return;
+        }
       }
+
+      await fetchRoomWithChat();
     };
-
-    fetchUser();
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (user) {
-      fetchRoomInfo();
-    }
-  }, [roomId, user]);
-
-  useEffect(() => {
-    if (roomInfo) {
-      fetchMessages();
-    }
-  }, [roomInfo]);
+    init();
+  }, [dispatch, roomId]);
 
   useEffect(() => {
     chatBoxRef.current?.scrollTo({
@@ -117,7 +113,7 @@ export default function ChatRoom() {
   const handleExit = () => navigate("/");
 
   const handleLeaveRoom = async () => {
-    if (roomInfo.hostName === user?.userName) {
+    if (roomWithChat?.roomData?.hostName === user?.userName) {
       const confirmDelete = window.confirm(
         "이 방은 삭제됩니다. 정말 나가시겠습니까?"
       );
@@ -127,13 +123,14 @@ export default function ChatRoom() {
     try {
       const res = await axios.delete(
         `http://localhost:8080/chatRoom/${roomId}`,
-        { withCredentials: true }
+        {
+          withCredentials: true,
+        }
       );
       alert(res.data.message);
       leaveRoom();
       navigate("/");
     } catch (err) {
-      console.error(err.response.message);
       alert("방 나가기 실패!");
     }
   };
@@ -176,28 +173,45 @@ export default function ChatRoom() {
     );
   }
 
-  if (!roomInfo) return null;
+  if (!roomWithChat) return null;
+
+  const { roomData } = roomWithChat;
 
   return (
     <div className="chat-room-wrapper styled-theme">
       <div className="room-info-panel relative">
         <div className="absolute top-2 right-2">
-          <ReportButton targetId={roomInfo.roomId} targetType="ROOM" />
+          <ReportButton targetId={roomData.roomId} targetType="ROOM" />
+        </div>
+        <h3>{roomData.roomTitle}</h3>
+        <p>
+          <strong>방장:</strong> {roomData.hostName}
+        </p>
+        <p>
+          <strong>참여 인원:</strong> {roomData.curPaticipants} /{" "}
+          {roomData.maxParticipants}
+        </p>
+        {console.log(user.userId)}
+        <div className="flex items-center gap-2 mt-2 flex-wrap">
+          {roomData.roomMembers?.map((member, idx) => (
+            <UserProfilePopup
+              key={idx}
+              userImg={member.userImg}
+              userNickname={member.userNickName}
+              userId={member.userId}
+              isHost={user.userId == roomData.hostId}
+              fromRoom={true}
+              roomId={roomId}
+              isMine={member.userId == user.userId}
+            />
+          ))}
         </div>
 
-        <h3>{roomInfo.roomTitle}</h3>
         <p>
-          <strong>방장:</strong> {roomInfo.hostName}
-        </p>
-        <p>
-          <strong>참여 인원:</strong> {roomInfo.curPaticipants} /{" "}
-          {roomInfo.maxParticipants}
-        </p>
-        <p>
-          <strong>유형:</strong> {roomInfo.roomType}
+          <strong>유형:</strong> {roomData.roomType}
         </p>
         <div
-          dangerouslySetInnerHTML={{ __html: roomInfo.roomContent || "" }}
+          dangerouslySetInnerHTML={{ __html: roomData.roomContent || "" }}
           className="room-content-wrapper"
         ></div>
       </div>

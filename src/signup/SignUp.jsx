@@ -11,10 +11,10 @@ export default function SignUp() {
   const birthDateRef = useRef(null);
   const genderRef = useRef(null);
 
-  const [isValid, setIsValid] = useState(false); // 이메일 인증 여부
+  const [isValid, setIsValid] = useState(false);
   const [location, setLocation] = useState({ sido: "", sigungu: "" });
   const [errors, setErrors] = useState({});
-  const [globalError, setGlobalError] = useState(""); // ← 전역 에러 메시지 추가
+  const [globalError, setGlobalError] = useState("");
   const navigate = useNavigate();
 
   const rules = {
@@ -54,7 +54,7 @@ export default function SignUp() {
     }
 
     setErrors((prev) => ({ ...prev, [name]: error }));
-    setGlobalError(""); // 필드 입력 시 글로벌 에러 초기화
+    setGlobalError("");
   };
 
   const handleAddressSearch = () => {
@@ -68,8 +68,19 @@ export default function SignUp() {
     }).open();
   };
 
+  const calculateAge = (birthStr) => {
+    const birthDate = new Date(birthStr);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
   const handleSubmit = () => {
-    setGlobalError(""); // 제출 전 초기화
+    setGlobalError("");
 
     if (!isValid) {
       setGlobalError("이메일 인증을 완료해주세요.");
@@ -87,6 +98,12 @@ export default function SignUp() {
       return;
     }
 
+    const age = calculateAge(birthDateRef.current.value);
+    if (age < 15) {
+      setGlobalError("15세 이상만 가입할 수 있습니다.");
+      return;
+    }
+
     const userData = {
       email: emailRef.current.value,
       password: passwordRef.current.value,
@@ -96,6 +113,7 @@ export default function SignUp() {
       gender: genderRef.current.value,
       sido: location.sido,
       sigungu: location.sigungu,
+      age: age,
     };
 
     axios
@@ -104,12 +122,13 @@ export default function SignUp() {
         withCredentials: true,
       })
       .then((res) => {
-        alert(res.data.data);
+        alert(res.data.message);
         navigate("/");
       })
       .catch((err) => {
-        const msg = err?.response?.data.data || "회원가입 중 오류 발생";
-        setGlobalError(msg); // ← 전역 에러 메시지 설정
+        console.log(err);
+        const msg = err?.response?.data?.message || "회원가입 중 오류 발생";
+        setGlobalError(msg);
       });
   };
 
@@ -118,7 +137,6 @@ export default function SignUp() {
       <div className="bg-[#DED8CB] p-8 rounded-lg shadow-lg w-96">
         <h2 className="text-2xl font-bold mb-6 text-center">회원가입</h2>
         <form className="space-y-4">
-          {/* 전역 에러 메시지 출력 */}
           {globalError && (
             <div className="bg-red-100 text-red-700 p-2 rounded text-sm text-center">
               {globalError}
@@ -165,7 +183,6 @@ export default function SignUp() {
             </div>
           ))}
 
-          {/* 성별 */}
           <div>
             <label className="block text-sm font-medium mb-1">성별</label>
             <select
@@ -184,7 +201,6 @@ export default function SignUp() {
             )}
           </div>
 
-          {/* 주소 */}
           <div>
             <label className="block text-sm font-medium mb-1">거주 지역</label>
             <div className="flex space-x-2">

@@ -1,20 +1,42 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import { Editor } from "@toast-ui/react-editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function PostEdit() {
-  const location = useLocation();
+  const { postId } = useParams();
   const navigate = useNavigate();
-  const post = location.state?.post;
-
-  const [title, setTitle] = useState(post?.title || "");
   const editorRef = useRef(null);
 
-  // ✅ 이미지 업로드 처리
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  // ✅ 게시글 상세 정보 불러오기
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const res = await axios.get(`http://localhost:8080/post/${postId}`, {
+          withCredentials: true,
+        });
+        const post = res.data.data;
+        setTitle(post.title);
+        setContent(post.content);
+      } catch (err) {
+        console.error("게시글 로딩 실패:", err);
+        toast.error("게시글을 불러오지 못했습니다.");
+        navigate("/post");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPost();
+  }, [postId, navigate]);
+
+  // ✅ 이미지 업로드
   const handleImageUpload = async (blob, callback) => {
     const formData = new FormData();
     formData.append("image", blob);
@@ -30,7 +52,7 @@ export default function PostEdit() {
       const fullUrl = "http://localhost:8080" + res.data.data;
       callback(fullUrl, "이미지");
     } catch (err) {
-      alert("이미지 업로드 실패:", err.response.data.message);
+      toast.error("이미지 업로드 실패: " + (err.response?.data?.message || ""));
     }
   };
 
@@ -39,21 +61,28 @@ export default function PostEdit() {
     const contentHTML = editorRef.current.getInstance().getHTML();
     axios
       .put(
-        `http://localhost:8080/post/${post.postId}`,
+        `http://localhost:8080/post/${postId}`,
         { title, content: contentHTML },
         { withCredentials: true }
       )
       .then(() => {
         toast.success("게시글이 수정되었습니다!");
         setTimeout(() => {
-          navigate(`/post/${post.postId}`);
+          navigate(`/post/${postId}`);
         }, 1500);
       })
       .catch((err) => {
-        console.error(err);
-        toast.error("수정 실패!");
+        toast.error(err.response?.data?.message || "수정 실패");
       });
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-gray-600 text-lg">게시글 불러오는 중...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -78,7 +107,7 @@ export default function PostEdit() {
             height="400px"
             initialEditType="wysiwyg"
             useCommandShortcut={true}
-            initialValue={post?.content || ""}
+            initialValue={content}
             hooks={{ addImageBlobHook: handleImageUpload }}
           />
         </div>
@@ -98,8 +127,6 @@ export default function PostEdit() {
           </button>
         </div>
       </div>
-
-      <ToastContainer position="top-center" autoClose={2000} />
     </div>
   );
 }

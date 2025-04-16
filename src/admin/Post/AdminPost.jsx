@@ -62,7 +62,6 @@ export default function AdminPost() {
 
   return (
     <div className="p-8 relative">
-      {/* 상단 타이틀 + 버튼 */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">📝 관리자 게시글 목록</h2>
         <button
@@ -72,8 +71,6 @@ export default function AdminPost() {
           ✏️ 공지 쓰기
         </button>
       </div>
-
-      {/* 검색창 ~ 이하 생략 */}
 
       <input
         type="text"
@@ -99,8 +96,9 @@ export default function AdminPost() {
             {posts.map((post) => (
               <tr
                 key={post.postId}
+                onClick={() => handleView(post)} // ✅ 클릭 시 상세 이동
                 onContextMenu={(e) => handleContextMenu(e, post)}
-                className="hover:bg-gray-50 transition-colors"
+                className="hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 <td className="px-4 py-2 border">{post.title}</td>
                 <td className="px-4 py-2 border">{post.userName}</td>

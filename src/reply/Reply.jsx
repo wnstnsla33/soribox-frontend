@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import ReportButton from "../report/ReportButton";
+import UserProfilePopup from "../layout/UserProfiePopup";
 export default function Reply({ reply, postId, isChild = false, onRefresh }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
@@ -22,7 +23,7 @@ export default function Reply({ reply, postId, isChild = false, onRefresh }) {
           alert("댓글이 삭제되었습니다.");
           onRefresh?.();
         })
-        .catch((err) => console.error("댓글 삭제 실패:", err));
+        .catch((err) => alert(err.response.data.message));
     }
   };
 
@@ -40,8 +41,7 @@ export default function Reply({ reply, postId, isChild = false, onRefresh }) {
         onRefresh?.();
       })
       .catch((err) => {
-        console.error("댓글 수정 실패:", err);
-        alert("댓글 수정 중 오류가 발생했습니다.");
+        alert(err.response.data.message);
       });
   };
 
@@ -67,10 +67,17 @@ export default function Reply({ reply, postId, isChild = false, onRefresh }) {
 
   return (
     <div className="mb-6 pb-3 text-sm">
-      {/* 👤 닉네임 / 날짜 + 버튼들 한 줄 정렬 */}
+      {/* 👤 프로필 이미지 + 닉네임 + 버튼들 */}
       <div className="flex justify-between items-center text-xs text-gray-600 mb-1">
-        {/* 왼쪽: 닉네임 */}
-        <span className="font-semibold text-black">{reply.userNickname}</span>
+        {/* 왼쪽: 이미지 + 닉네임 */}
+        <div className="flex items-center gap-2">
+          <UserProfilePopup
+            userImg={reply.userImg}
+            userNickname={reply.userNickname}
+            userId={reply.userId}
+          />
+          <span className="font-semibold text-black">{reply.userNickname}</span>
+        </div>
 
         {/* 오른쪽: 날짜 + 버튼들 */}
         <div className="flex items-center gap-3">
@@ -104,7 +111,6 @@ export default function Reply({ reply, postId, isChild = false, onRefresh }) {
             </>
           )}
 
-          {/* 🛡️ 신고 버튼 - 항상 노출 */}
           <ReportButton
             targetId={reply.replyId}
             targetType="REPLY"

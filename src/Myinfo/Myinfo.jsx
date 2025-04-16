@@ -1,7 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-export default function UserModal({ user, onLogout, onClose }) {
+export default function UserModal({
+  user,
+  onLogout,
+  onClose,
+  onFriendListOpen,
+}) {
   return (
     <div className="absolute top-16 right-4 w-64 bg-white shadow-lg rounded-lg border border-gray-200 z-50">
       <div className="p-4">
@@ -9,7 +14,7 @@ export default function UserModal({ user, onLogout, onClose }) {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold">내 정보</h2>
           <img
-            src={`http://localhost:8080${user.userImg}`} // ← 여기!
+            src={`http://localhost:8080${user.userImg}`}
             alt="유저 프로필"
             className="w-12 h-12 rounded-full object-cover border"
           />
@@ -35,6 +40,7 @@ export default function UserModal({ user, onLogout, onClose }) {
           </div>
         </div>
 
+        {/* 링크 메뉴 */}
         <div className="flex flex-col space-y-2 text-sm text-gray-700">
           <Link to="profile" className="hover:underline" onClick={onClose}>
             내 정보 보기
@@ -48,6 +54,17 @@ export default function UserModal({ user, onLogout, onClose }) {
           <Link to={`/post/myPost`} onClick={onClose}>
             내 게시판글 보기
           </Link>
+
+          {/* ✅ 친구 목록은 가장 아래로 */}
+          <button
+            onClick={() => {
+              onClose();
+              onFriendListOpen();
+            }}
+            className="text-left hover:underline"
+          >
+            친구 목록 보기
+          </button>
         </div>
 
         <button

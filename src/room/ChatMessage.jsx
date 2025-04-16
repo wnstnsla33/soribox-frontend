@@ -2,7 +2,7 @@ import React from "react";
 import "./ChatRoom.css";
 import ChatProfileMenu from "./ChatProfileMenu";
 export default function ChatMessage({ chat, isMine }) {
-  if (chat.type === "ENTER" || chat.type === "QUIT") {
+  if (chat.type === "ENTER" || chat.type === "QUIT" || chat.type === "BANNED") {
     return <div className="system-message">{chat.message}</div>;
   }
 

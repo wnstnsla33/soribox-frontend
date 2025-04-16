@@ -2,6 +2,11 @@ export default function SnsLoginButton() {
   const naverLogin = () => {
     window.location.href = "http://localhost:8080/oauth2/authorization/naver";
   };
+
+  const kakaoLogin = async () => {
+    window.location.href = "http://localhost:8080/oauth2/authorization/kakao";
+  };
+
   return (
     <div className="mt-4 flex justify-center space-x-2">
       <button className="w-10 h-10 flex items-center justify-center bg-white border border-gray-300 rounded-full hover:bg-gray-100">
@@ -12,7 +17,10 @@ export default function SnsLoginButton() {
         />
       </button>
 
-      <button className="w-10 h-10 flex items-center justify-center bg-yellow-300 border border-yellow-400 rounded-full hover:bg-yellow-400">
+      <button
+        onClick={kakaoLogin}
+        className="w-10 h-10 flex items-center justify-center bg-yellow-300 border border-yellow-400 rounded-full hover:bg-yellow-400"
+      >
         <img
           src="https://upload.wikimedia.org/wikipedia/commons/e/e3/KakaoTalk_logo.svg"
           alt="Kakao"
@@ -21,7 +29,7 @@ export default function SnsLoginButton() {
       </button>
 
       <button
-        onClick={() => naverLogin()}
+        onClick={naverLogin}
         className="w-10 h-10 flex items-center justify-center bg-green-500 border border-green-600 rounded-full hover:bg-green-600"
       >
         <img

@@ -10,8 +10,6 @@ export default function ProfileEdit() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user.userInfo);
-
-  // 새로고침 시 유저 정보 가져오기
   useEffect(() => {
     if (!user) {
       dispatch(fetchUserInfo());
@@ -36,7 +34,7 @@ export default function ProfileEdit() {
       navigate("/profile");
     } catch (err) {
       console.error("프로필 수정 실패:", err);
-      alert("프로필 수정에 실패했습니다. 다시 시도해주세요.");
+      alert(err.response.data.message);
     }
   };
 

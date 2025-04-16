@@ -23,6 +23,7 @@ export default function ValidEmail({ isValid, ref }) {
       })
       .then((res) => {
         alert("이메일을 확인하세요");
+        setSendCode(true); // ✅ 요거 추가해야 인증번호 필드 나옴!
       })
       .catch((error) => {
         alert(error);
@@ -38,6 +39,7 @@ export default function ValidEmail({ isValid, ref }) {
       )
       .then((res) => {
         setIsVerified(true);
+        alert("인증이 완료됐습니다.");
         isValid(); // 부모에 인증 완료 전달
       })
       .catch((error) => {

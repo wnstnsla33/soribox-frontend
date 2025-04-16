@@ -1,21 +1,22 @@
-import React, { useRef, useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { Editor } from "@toast-ui/react-editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
 import { useNavigate } from "react-router-dom";
+
 export default function WritePost() {
   const titleRef = useRef(null);
   const editorRef = useRef(null);
   const [isSecret, setIsSecret] = useState(false);
   const [secretPassword, setSecretPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ 중복 클릭 방지
   const navigate = useNavigate();
-  // HTML에서 첫 번째 이미지 src 추출
+
   const extractFirstImageSrc = (html) => {
     const match = html.match(/<img[^>]+src=["']?([^>"']+)["']?/);
     return match ? match[1] : "http://localhost:8080/uploads/noimg.png";
   };
 
-  // 에디터 내부 이미지 업로드 처리
   const handleImageUpload = async (blob, callback) => {
     const formData = new FormData();
     formData.append("image", blob);
@@ -36,6 +37,9 @@ export default function WritePost() {
   };
 
   const handleSubmit = async () => {
+    if (isSubmitting) return; // ✅ 이미 제출 중이면 무시
+    setIsSubmitting(true); // ✅ 중복 방지 락
+
     const contentHTML = editorRef.current.getInstance().getHTML();
     const titleImgSrc = extractFirstImageSrc(contentHTML);
 
@@ -47,6 +51,7 @@ export default function WritePost() {
     if (isSecret) {
       if (!secretPassword.trim()) {
         alert("비밀글 비밀번호를 입력해주세요");
+        setIsSubmitting(false);
         return;
       }
       formData.append("secreteKey", secretPassword);
@@ -62,6 +67,8 @@ export default function WritePost() {
     } catch (err) {
       alert(err.response.data.message);
       navigate("/");
+    } finally {
+      setIsSubmitting(false); // ✅ 다시 작성 가능하게
     }
   };
 
@@ -122,9 +129,14 @@ export default function WritePost() {
       <div className="flex justify-end">
         <button
           onClick={handleSubmit}
-          className="px-6 py-3 bg-[#DED8CB] text-black rounded-lg hover:bg-[#c8c2b5] transition"
+          disabled={isSubmitting}
+          className={`px-6 py-3 rounded-lg transition ${
+            isSubmitting
+              ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+              : "bg-[#DED8CB] text-black hover:bg-[#c8c2b5]"
+          }`}
         >
-          작성하기
+          {isSubmitting ? "작성 중..." : "작성하기"}
         </button>
       </div>
     </div>

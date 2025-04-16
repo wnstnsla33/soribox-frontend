@@ -14,6 +14,9 @@ import ChatRoom from "../room/ChatRoom";
 import MyRooms from "../room/MyRooms/MyRooms";
 import NotFound from "../ErrorPage/NotFound";
 import NoticePost from "../Post/NoticePost";
+import MyMessageList from "../message/MyMessageList";
+import { MessageDetail } from "../message/MessageDetail";
+import RequireAuth from "./RequireAuth";
 const UserRouter = [
   {
     path: "/",
@@ -21,18 +24,93 @@ const UserRouter = [
     children: [
       { path: "/", element: <MainPage /> },
       { path: "/signup", element: <SignUp /> },
-      { path: "/profile", element: <Profile /> },
-      { path: "/profileEdit", element: <ProfileEdit /> },
+      {
+        path: "/profile",
+        element: (
+          <RequireAuth>
+            <Profile />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "/profileEdit",
+        element: (
+          <RequireAuth>
+            <ProfileEdit />
+          </RequireAuth>
+        ),
+      },
+
       { path: "/post", element: <Post /> },
       { path: "/post/notice", element: <NoticePost /> },
-      { path: "/post/new", element: <WritePost /> },
+
+      {
+        path: "/post/new",
+        element: (
+          <RequireAuth>
+            <WritePost />
+          </RequireAuth>
+        ),
+      },
       { path: "/post/:postId", element: <PostDetail /> },
-      { path: "/post/edit/:postId", element: <PostEdit /> },
-      { path: "/post/myPost", element: <MyPost /> },
+      {
+        path: "/post/edit/:postId",
+        element: (
+          <RequireAuth>
+            <PostEdit />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "/post/myPost",
+        element: (
+          <RequireAuth>
+            <MyPost />
+          </RequireAuth>
+        ),
+      },
       { path: "/stomp", element: <Stomp /> },
-      { path: "/createRoom", element: <CreateRoom /> },
-      { path: "/room/:roomId", element: <ChatRoom /> },
-      { path: "/myRooms", element: <MyRooms /> },
+      {
+        path: "/createRoom",
+        element: (
+          <RequireAuth>
+            <CreateRoom />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "/room/:roomId",
+        element: (
+          <RequireAuth>
+            <ChatRoom />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "/myRooms",
+        element: (
+          <RequireAuth>
+            <MyRooms />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "/myMessage",
+        element: (
+          <RequireAuth>
+            <MyMessageList />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "/messages/:messageId",
+        element: (
+          <RequireAuth>
+            <MessageDetail />
+          </RequireAuth>
+        ),
+      },
+
       { path: "*", element: <NotFound /> },
     ],
   },

@@ -8,8 +8,10 @@ import { Editor } from "@toast-ui/react-editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
 
 export default function CreateRoom() {
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
   const editorRef = useRef();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     roomTitle: "",
@@ -53,7 +55,6 @@ export default function CreateRoom() {
   const handleImageUpload = async (blob, callback) => {
     const form = new FormData();
     form.append("image", blob);
-
     try {
       const res = await axios.post(
         "http://localhost:8080/chatRoom/image",
@@ -72,7 +73,9 @@ export default function CreateRoom() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return; // ✅ 중복 클릭 방지
 
+    // 유효성 검사
     if (!formData.sido || !formData.sigungu)
       return alert("주소를 선택해주세요.");
     if (!formData.roomType) return alert("방 타입을 선택해주세요.");
@@ -82,7 +85,6 @@ export default function CreateRoom() {
       return alert("비밀방 비밀번호를 입력해주세요.");
 
     const html = editorRef.current.getInstance().getHTML();
-
     const fullForm = new FormData();
     fullForm.append("roomTitle", formData.roomTitle);
     fullForm.append("roomType", formData.roomType);
@@ -102,6 +104,8 @@ export default function CreateRoom() {
       fullForm.append("roomSaveImg", roomSaveImg);
     }
 
+    setIsSubmitting(true); // 🔒 버튼 잠금
+
     try {
       const res = await axios.post("http://localhost:8080/chatRoom", fullForm, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -110,8 +114,12 @@ export default function CreateRoom() {
       alert(res.data.message);
       navigate(`/room/${res.data.data.roomId}`);
     } catch (err) {
-      console.error(err);
-      alert(err.data.message);
+      console.log(err);
+      const message =
+        err.response?.data?.message || "방 생성 중 문제가 발생했습니다.";
+      setErrorMessage(message);
+    } finally {
+      setIsSubmitting(false); // 🔓 해제
     }
   };
 
@@ -235,7 +243,7 @@ export default function CreateRoom() {
           </div>
         </div>
 
-        {/* 비밀방 체크 */}
+        {/* 비밀방 */}
         <div className="flex items-center">
           <input
             type="checkbox"
@@ -250,7 +258,6 @@ export default function CreateRoom() {
           </label>
         </div>
 
-        {/* 비밀번호 입력 */}
         {formData.isPrivate && (
           <div>
             <label className="block font-semibold mb-1">비밀번호</label>
@@ -268,10 +275,20 @@ export default function CreateRoom() {
         {/* 제출 */}
         <button
           type="submit"
-          className="w-full bg-green-500 text-white py-3 rounded hover:bg-green-600"
+          disabled={isSubmitting}
+          className={`w-full py-3 rounded text-white transition ${
+            isSubmitting
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-green-500 hover:bg-green-600"
+          }`}
         >
-          방 생성
+          {isSubmitting ? "방 생성 중..." : "방 생성"}
         </button>
+        {errorMessage && (
+          <p className="text-red-500 font-medium text-center mt-2">
+            {errorMessage}
+          </p>
+        )}
       </form>
     </div>
   );

@@ -1,10 +1,12 @@
 import { useRef, useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
+
 export default function ProfileEditForm({ user, onUpdate }) {
   const nickNameRef = useRef(null);
   const userInfoRef = useRef(null);
   const newPasswordRef = useRef(null);
   const passwordRef = useRef(null);
+  const birthRef = useRef(null);
 
   const [location, setLocation] = useState({
     sido: user?.sido || "",
@@ -58,11 +60,15 @@ export default function ProfileEditForm({ user, onUpdate }) {
     formData.append("sido", location.sido);
     formData.append("sigungu", location.sigungu);
 
+    if (!user.userBirthDay && birthRef.current?.value) {
+      formData.append("birthDay", birthRef.current.value); // ISO 날짜 문자열
+    }
+
     if (image.file) {
       formData.append("userImg", image.file);
     }
 
-    onUpdate(formData, isSNSUser); // multipart/form-data 전송
+    onUpdate(formData, isSNSUser);
   };
 
   return (
@@ -114,6 +120,18 @@ export default function ProfileEditForm({ user, onUpdate }) {
           defaultValue={user.userInfo}
         />
       </div>
+
+      {/* 생년월일 (userBirthDay가 없을 경우만 표시) */}
+      {!user.userBirthDay && (
+        <div className="mb-4">
+          <label className="block font-semibold mb-2">생년월일</label>
+          <input
+            type="date"
+            ref={birthRef}
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring focus:ring-gray-300"
+          />
+        </div>
+      )}
 
       {/* 거주 지역 */}
       <div className="mb-4">

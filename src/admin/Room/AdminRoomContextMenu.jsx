@@ -16,15 +16,6 @@ export default function AdminRoomContextMenu({
     >
       <li
         onClick={() => {
-          alert(`방 정보 보기: ${roomId} (${roomTitle})`);
-          onClose();
-        }}
-        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-      >
-        👁 방 정보 보기
-      </li>
-      <li
-        onClick={() => {
           onDelete();
           onClose();
         }}
