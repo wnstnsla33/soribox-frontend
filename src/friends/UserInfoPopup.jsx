@@ -5,10 +5,10 @@ import dayjs from "dayjs";
 
 export default function UserInfoPopup({ userId, onClose }) {
   const [user, setUser] = useState(null);
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   useEffect(() => {
     axios
-      .get(`http://localhost:8080/user/detail/${userId}`, {
+      .get(`${BASE_URL}/user/detail/${userId}`, {
         withCredentials: true,
       })
       .then((res) => {
@@ -41,7 +41,7 @@ export default function UserInfoPopup({ userId, onClose }) {
 
         <div className="flex items-center gap-4 mb-4">
           <img
-            src={`http://localhost:8080${user.userImg}`}
+            src={`${BASE_URL}${user.userImg}`}
             alt="프로필"
             className="w-16 h-16 rounded-full object-cover border"
           />
@@ -80,7 +80,7 @@ export default function UserInfoPopup({ userId, onClose }) {
                 >
                   <div className="flex items-center gap-2">
                     <img
-                      src={`http://localhost:8080${room.roomImg}`}
+                      src={`${BASE_URL}${room.roomImg}`}
                       alt="방"
                       className="w-10 h-10 rounded object-cover"
                     />

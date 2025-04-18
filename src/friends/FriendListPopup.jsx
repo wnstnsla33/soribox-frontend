@@ -6,10 +6,10 @@ import UserProfilePopup from "../layout/UserProfiePopup";
 export default function FriendListPopup({ onClose }) {
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const fetchFriends = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/friends", {
+      const res = await axios.get(`${BASE_URL}/friends`, {
         withCredentials: true,
       });
       setFriends(res.data.data);

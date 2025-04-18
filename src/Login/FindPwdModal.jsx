@@ -6,7 +6,7 @@ export default function FindPwdModal({ onClose }) {
   const [name, setName] = useState("");
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const handleFindPwd = async () => {
     setResult(null);
     setError(null);
@@ -22,7 +22,7 @@ export default function FindPwdModal({ onClose }) {
 
     try {
       const res = await axios.post(
-        "http://localhost:8080/find/pwd",
+        `${BASE_URL}/find/pwd`,
         {
           userEmail: email,
           userName: name,

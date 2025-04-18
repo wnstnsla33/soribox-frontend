@@ -10,13 +10,13 @@ export default function AdminUser() {
   const [totalPages, setTotalPages] = useState(0);
   const [contextMenu, setContextMenu] = useState(null);
   const contextRef = useRef(null);
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [messageTargetUser, setMessageTargetUser] = useState(null);
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/admin/user", {
+      const res = await axios.get(`${BASE_URL}/admin/user`, {
         params: { page, name: keyword },
         withCredentials: true,
       });

@@ -13,7 +13,7 @@ export default function ChatProfileMenu({
   const [reportOpen, setReportOpen] = useState(false);
   const [showUserInfo, setShowUserInfo] = useState(false); // ✅ 유저정보 팝업 상태
   const menuRef = useRef();
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -41,7 +41,7 @@ export default function ChatProfileMenu({
   return (
     <div className="relative" ref={menuRef}>
       <img
-        src={`http://localhost:8080${userImg}`}
+        src={`${BASE_URL}${userImg}`}
         className="chat-profile-image cursor-pointer"
         onClick={handleProfileClick}
         alt="profile"

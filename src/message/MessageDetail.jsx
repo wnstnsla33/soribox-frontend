@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import MessageModal from "../admin/user/MessageModal";
 export function MessageDetail() {
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const { messageId } = useParams();
   const navigate = useNavigate();
   const [message, setMessage] = useState(null);
@@ -10,7 +11,7 @@ export function MessageDetail() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:8080/messages/${messageId}`, {
+      .get(`${BASE_URL}/messages/${messageId}`, {
         withCredentials: true,
       })
       .then((res) => {

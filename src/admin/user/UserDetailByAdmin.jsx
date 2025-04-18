@@ -8,13 +8,12 @@ export default function UserDetailByAdmin() {
   const { userId } = useParams();
   const [user, setUser] = useState(null);
   const [tab, setTab] = useState("chats");
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const fetchUser = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:8080/admin/user/${userId}`,
-        { withCredentials: true }
-      );
+      const res = await axios.get(`${BASE_URL}/admin/user/${userId}`, {
+        withCredentials: true,
+      });
       setUser(res.data.data);
     } catch (err) {
       console.error("유저 정보 불러오기 실패", err);
@@ -86,7 +85,7 @@ export default function UserDetailByAdmin() {
         {/* 오른쪽: 프로필 이미지 */}
         <div className="ml-6">
           <img
-            src={`http://localhost:8080${user.userImg}`}
+            src={`${BASE_URL}${user.userImg}`}
             alt="프로필 이미지"
             className="w-40 h-40 object-cover rounded-lg border"
           />

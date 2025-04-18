@@ -6,7 +6,7 @@ import axios from "axios";
 export default function StatusChangeModal({ report, onClose, onSuccess }) {
   const [status, setStatus] = useState("");
   const [adminMessage, setAdminMessage] = useState("");
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const handleSubmit = async () => {
     if (!status) {
       alert("상태를 선택해주세요.");
@@ -19,13 +19,9 @@ export default function StatusChangeModal({ report, onClose, onSuccess }) {
         reason: status === "ACCEPT" ? adminMessage : null,
       };
 
-      await axios.put(
-        `http://localhost:8080/admin/reports/${report.reportId}`,
-        payload,
-        {
-          withCredentials: true,
-        }
-      );
+      await axios.put(`${BASE_URL}/admin/reports/${report.reportId}`, payload, {
+        withCredentials: true,
+      });
 
       alert("상태가 변경되었습니다.");
       onSuccess();

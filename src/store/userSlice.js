@@ -6,7 +6,9 @@ import axios from "axios";
 const refreshAccessToken = async () => {
   console.log("🟡 refreshAccessToken() 호출됨");
   try {
-    const res = await axios.get("http://localhost:8080/auth/getToken", {
+    const BASE_URL = process.env.REACT_APP_API_URL;
+
+    const res = await axios.get(`${BASE_URL}/auth/getToken`, {
       withCredentials: true,
     });
     console.log("🟢 access 재발급 성공:", res.data);
@@ -22,7 +24,8 @@ export const fetchUserInfo = createAsyncThunk(
   "user/fetchUserInfo",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get("http://localhost:8080/user", {
+      const BASE_URL = process.env.REACT_APP_API_URL;
+      const res = await axios.get(`${BASE_URL}/user`, {
         withCredentials: true,
       });
       console.log(res);
@@ -39,7 +42,8 @@ export const fetchUserInfo = createAsyncThunk(
         if (refreshed) {
           try {
             // 재발급 성공했으면 다시 유저 정보 요청
-            const retryRes = await axios.get("http://localhost:8080/user", {
+            const BASE_URL = process.env.REACT_APP_API_URL;
+            const retryRes = await axios.get(`${BASE_URL}/user`, {
               withCredentials: true,
             });
             return retryRes.data;
@@ -60,8 +64,9 @@ export const fetchUserInfo = createAsyncThunk(
 
 // ✅ 로그아웃 처리
 export const logout = createAsyncThunk("user/logout", async () => {
+  const BASE_URL = process.env.REACT_APP_API_URL;
   await axios
-    .post("http://localhost:8080/auth/logout", {}, { withCredentials: true })
+    .post(`${BASE_URL}/auth/logout`, {}, { withCredentials: true })
     .then((res) => {
       alert(res.data.message);
       fetchUserInfo();

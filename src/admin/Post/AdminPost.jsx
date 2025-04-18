@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import AdminContextMenu from "./AdminContextMenu";
 
 export default function AdminPost() {
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const [posts, setPosts] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [page, setPage] = useState(0);
@@ -13,7 +14,7 @@ export default function AdminPost() {
 
   const fetchPosts = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/admin/post", {
+      const res = await axios.get(`${BASE_URL}/admin/post`, {
         params: { page, name: keyword },
         withCredentials: true,
       });
@@ -32,7 +33,7 @@ export default function AdminPost() {
     const confirmed = window.confirm(`'${post.title}' 게시글을 삭제할까요?`);
     if (!confirmed) return;
     try {
-      await axios.delete(`http://localhost:8080/admin/post/${post.postId}`, {
+      await axios.delete(`${BASE_URL}/admin/post/${post.postId}`, {
         withCredentials: true,
       });
       alert("삭제되었습니다.");

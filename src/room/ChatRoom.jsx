@@ -20,6 +20,7 @@ export default function ChatRoom() {
   const [passwordInput, setPasswordInput] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const chatBoxRef = useRef(null);
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const handleEnterUser = (newUser) => {
     setRoomWithChat((prev) => {
       if (!prev || !newUser) return prev;
@@ -48,7 +49,7 @@ export default function ChatRoom() {
 
   const fetchRoomWithChat = async () => {
     try {
-      const res = await axios.get(`http://localhost:8080/chatRoom/${roomId}`, {
+      const res = await axios.get(`${BASE_URL}/chatRoom/${roomId}`, {
         withCredentials: true,
       });
       const data = res.data.data;
@@ -67,7 +68,7 @@ export default function ChatRoom() {
   const verifyPassword = async () => {
     try {
       const res = await axios.post(
-        `http://localhost:8080/chatRoom/${roomId}/verify`,
+        `${BASE_URL}/chatRoom/${roomId}/verify`,
         { password: passwordInput },
         { withCredentials: true }
       );
@@ -121,12 +122,9 @@ export default function ChatRoom() {
     }
 
     try {
-      const res = await axios.delete(
-        `http://localhost:8080/chatRoom/${roomId}`,
-        {
-          withCredentials: true,
-        }
-      );
+      const res = await axios.delete(`${BASE_URL}/chatRoom/${roomId}`, {
+        withCredentials: true,
+      });
       alert(res.data.message);
       leaveRoom();
       navigate("/");

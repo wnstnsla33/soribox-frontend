@@ -9,17 +9,14 @@ export default function UserChatLog({ userId }) {
   const [hasMore, setHasMore] = useState(true);
   const [roomKeyword, setRoomKeyword] = useState("");
   const loader = useRef();
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   // ✅ 채팅 데이터 가져오기
   const fetchChats = async (pageNumber, keyword) => {
     try {
-      const res = await axios.get(
-        `http://localhost:8080/admin/chat/${userId}`,
-        {
-          params: { page: pageNumber, room: keyword },
-          withCredentials: true,
-        }
-      );
+      const res = await axios.get(`${BASE_URL}/admin/chat/${userId}`, {
+        params: { page: pageNumber, room: keyword },
+        withCredentials: true,
+      });
       const newChats = res.data.data;
       setChats((prev) => [...prev, ...newChats]);
       setHasMore(pageNumber + 1 < res.data.pages);

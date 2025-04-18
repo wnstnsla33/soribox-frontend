@@ -15,7 +15,7 @@ export default function Rooms() {
   const [totalPages, setTotalPages] = useState(1);
   const [useNearby, setUseNearby] = useState(false); // ✅ 스위치 상태
   const navigate = useNavigate();
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const handlePageChange = (page) => {
     if (page >= 0 && page < totalPages) {
       setCurrentPage(page);
@@ -25,8 +25,8 @@ export default function Rooms() {
   const fetchRooms = async () => {
     try {
       const url = useNearby
-        ? "http://localhost:8080/chatRoom/search/near"
-        : "http://localhost:8080/chatRoom/search";
+        ? `${BASE_URL}/chatRoom/search/near`
+        : `${BASE_URL}/chatRoom/search`;
 
       const res = await axios.get(url, {
         params: {

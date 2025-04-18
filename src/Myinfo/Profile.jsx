@@ -6,7 +6,7 @@ import DeleteConfirmModal from "./DeleteConfirmModal";
 
 export default function Profile() {
   const user = useSelector((state) => state.user.userInfo);
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const isSNS =
     user?.userEmail.startsWith("naver ") ||
     user?.userEmail.startsWith("google ") ||
@@ -18,7 +18,7 @@ export default function Profile() {
 
   const handleDelete = () => {
     axios
-      .delete("http://localhost:8080/user/delete", {
+      .delete(`${BASE_URL}/user/delete`, {
         data: isSNS ? {} : { pwd: password },
         withCredentials: true,
       })
@@ -40,7 +40,7 @@ export default function Profile() {
       {/* 프로필 이미지 및 닉네임 */}
       <div className="flex items-center gap-6">
         <img
-          src={`http://localhost:8080${user.userImg}`}
+          src={`${BASE_URL}${user.userImg}`}
           alt="유저 프로필 이미지"
           className="w-32 h-32 rounded-full object-cover border"
         />

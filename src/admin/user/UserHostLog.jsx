@@ -5,13 +5,12 @@ import { useNavigate, useParams } from "react-router-dom";
 export default function UserHostLog({ userId }) {
   const [rooms, setRooms] = useState([]);
   const navigate = useNavigate();
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const fetchRooms = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:8080/admin/room/${userId}`,
-        { withCredentials: true }
-      );
+      const res = await axios.get(`${BASE_URL}/admin/room/${userId}`, {
+        withCredentials: true,
+      });
       console.log(res);
       setRooms(res.data.data);
     } catch (err) {

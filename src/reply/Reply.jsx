@@ -9,14 +9,14 @@ export default function Reply({ reply, postId, isChild = false, onRefresh }) {
   const [showReplies, setShowReplies] = useState(false);
   const [editedContent, setEditedContent] = useState(reply.content);
   const [newReply, setNewReply] = useState("");
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const user = useSelector((state) => state.user.userInfo);
   const isAuthorized = user?.userId === reply.userId;
 
   const handleDelete = () => {
     if (window.confirm("정말 삭제하시겠습니까?")) {
       axios
-        .delete(`http://localhost:8080/post/${postId}/${reply.replyId}`, {
+        .delete(`${BASE_URL}/post/${postId}/${reply.replyId}`, {
           withCredentials: true,
         })
         .then(() => {
@@ -31,7 +31,7 @@ export default function Reply({ reply, postId, isChild = false, onRefresh }) {
     if (!editedContent.trim()) return alert("댓글 내용을 입력하세요.");
     axios
       .put(
-        `http://localhost:8080/post/${reply.replyId}/reply`,
+        `${BASE_URL}/post/${reply.replyId}/reply`,
         { content: editedContent },
         { withCredentials: true }
       )
@@ -49,7 +49,7 @@ export default function Reply({ reply, postId, isChild = false, onRefresh }) {
     if (!newReply.trim()) return alert("답글을 입력하세요.");
     axios
       .post(
-        `http://localhost:8080/post/${postId}/reply`,
+        `${BASE_URL}/post/${postId}/reply`,
         { content: newReply, parentReplyId: reply.replyId },
         { withCredentials: true }
       )

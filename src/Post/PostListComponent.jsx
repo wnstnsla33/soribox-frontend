@@ -9,11 +9,11 @@ export default function PostListComponent({ posts, ClickBookmark }) {
   const [password, setPassword] = useState("");
   const [selectedPostId, setSelectedPostId] = useState(null);
   const navigate = useNavigate();
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const getFirstImageFromContent = (html) => {
-    if (!html) return "http://localhost:8080/uploads/classicImage/noimg.png";
+    if (!html) return `${BASE_URL}/uploads/classicImage/noimg.png`;
     const match = html.match(/<img[^>]+src=["']?([^>"']+)["']?[^>]*>/);
-    return match?.[1] || "http://localhost:8080/uploads/classicImage/noimg.png";
+    return match?.[1] || `${BASE_URL}/uploads/classicImage/noimg.png`;
   };
 
   const getTextOnlyFromContent = (html) => {
@@ -33,7 +33,7 @@ export default function PostListComponent({ posts, ClickBookmark }) {
   const handleConfirmPassword = async (postId) => {
     try {
       const res = await axios.post(
-        `http://localhost:8080/post/secrete/${postId}`,
+        `${BASE_URL}/post/secrete/${postId}`,
         { pwd: password },
         { withCredentials: true }
       );

@@ -13,11 +13,11 @@ export default function AdminReportList() {
   const [pageCount, setPageCount] = useState(0);
   const [selectedReport, setSelectedReport] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const navigate = useNavigate();
   const fetchReports = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/admin/reports", {
+      const res = await axios.get(`${BASE_URL}/admin/reports`, {
         params: { keyword, status, page },
         withCredentials: true,
       });

@@ -6,12 +6,13 @@ export default function useChatSocket({ roomId, user, onUserEnter }) {
   const [messages, setMessages] = useState([]);
   const clientRef = useRef(null);
   const navigate = useNavigate();
+  const BASE_URL = process.env.REACT_APP_API_URL;
   useEffect(() => {
     if (!user) {
       return;
     }
 
-    const socket = new SockJS(`http://localhost:8080/ws-stomp`);
+    const socket = new SockJS(`${BASE_URL}/ws-stomp`);
     const client = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000,

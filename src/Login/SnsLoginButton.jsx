@@ -1,15 +1,22 @@
 export default function SnsLoginButton() {
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const naverLogin = () => {
-    window.location.href = "http://localhost:8080/oauth2/authorization/naver";
+    window.location.href = `${BASE_URL}/oauth2/authorization/naver`;
   };
 
-  const kakaoLogin = async () => {
-    window.location.href = "http://localhost:8080/oauth2/authorization/kakao";
+  const kakaoLogin = () => {
+    window.location.href = `${BASE_URL}/oauth2/authorization/kakao`;
   };
 
+  const googleLogin = () => {
+    window.location.href = `${BASE_URL}/oauth2/authorization/google`;
+  };
   return (
     <div className="mt-4 flex justify-center space-x-2">
-      <button className="w-10 h-10 flex items-center justify-center bg-white border border-gray-300 rounded-full hover:bg-gray-100">
+      <button
+        onClick={googleLogin}
+        className="w-10 h-10 flex items-center justify-center bg-white border border-gray-300 rounded-full hover:bg-gray-100"
+      >
         <img
           src="https://img.icons8.com/?size=100&id=V5cGWnc9R4xj&format=png&color=000000"
           alt="Google"

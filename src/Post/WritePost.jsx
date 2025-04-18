@@ -11,25 +11,21 @@ export default function WritePost() {
   const [secretPassword, setSecretPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false); // ✅ 중복 클릭 방지
   const navigate = useNavigate();
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const extractFirstImageSrc = (html) => {
     const match = html.match(/<img[^>]+src=["']?([^>"']+)["']?/);
-    return match ? match[1] : "http://localhost:8080/uploads/noimg.png";
+    return match ? match[1] : `${BASE_URL}/uploads/noimg.png`;
   };
 
   const handleImageUpload = async (blob, callback) => {
     const formData = new FormData();
     formData.append("image", blob);
     try {
-      const res = await axios.post(
-        "http://localhost:8080/post/image",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-          withCredentials: true,
-        }
-      );
-      const fullUrl = "http://localhost:8080" + res.data.data;
+      const res = await axios.post(`${BASE_URL}/post/image`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+      });
+      const fullUrl = `${BASE_URL}` + res.data.data;
       callback(fullUrl, "이미지");
     } catch (err) {
       alert("이미지 업로드 실패:", err.response.data.message);
@@ -58,7 +54,7 @@ export default function WritePost() {
     }
 
     try {
-      const res = await axios.post("http://localhost:8080/post/new", formData, {
+      const res = await axios.post(`${BASE_URL}/post/new`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       });

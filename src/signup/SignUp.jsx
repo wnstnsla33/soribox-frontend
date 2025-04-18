@@ -10,7 +10,7 @@ export default function SignUp() {
   const realNameRef = useRef(null);
   const birthDateRef = useRef(null);
   const genderRef = useRef(null);
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const [isValid, setIsValid] = useState(false);
   const [location, setLocation] = useState({ sido: "", sigungu: "" });
   const [errors, setErrors] = useState({});
@@ -117,7 +117,7 @@ export default function SignUp() {
     };
 
     axios
-      .post("http://localhost:8080/signup", userData, {
+      .post(`${BASE_URL}/signup`, userData, {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       })

@@ -6,16 +6,13 @@ export default function MyRooms() {
   const [myRooms, setMyRooms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:8080/chatRoom/hostRooms",
-          {
-            withCredentials: true,
-          }
-        );
+        const res = await axios.get(`${BASE_URL}/chatRoom/hostRooms`, {
+          withCredentials: true,
+        });
         setMyRooms(res.data.data || []);
       } catch (err) {
         console.error("방 목록 불러오기 실패", err);

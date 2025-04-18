@@ -12,7 +12,7 @@ export default function CreateRoom() {
   const navigate = useNavigate();
   const editorRef = useRef();
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const [formData, setFormData] = useState({
     roomTitle: "",
     roomType: "",
@@ -56,15 +56,11 @@ export default function CreateRoom() {
     const form = new FormData();
     form.append("image", blob);
     try {
-      const res = await axios.post(
-        "http://localhost:8080/chatRoom/image",
-        form,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-          withCredentials: true,
-        }
-      );
-      const imageUrl = "http://localhost:8080" + res.data.data;
+      const res = await axios.post(`${BASE_URL}/chatRoom/image`, form, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+      });
+      const imageUrl = `${BASE_URL}` + res.data.data;
       callback(imageUrl, "대표 이미지");
     } catch (err) {
       console.error("이미지 업로드 실패:", err);
@@ -107,7 +103,7 @@ export default function CreateRoom() {
     setIsSubmitting(true); // 🔒 버튼 잠금
 
     try {
-      const res = await axios.post("http://localhost:8080/chatRoom", fullForm, {
+      const res = await axios.post(`${BASE_URL}/chatRoom`, fullForm, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       });

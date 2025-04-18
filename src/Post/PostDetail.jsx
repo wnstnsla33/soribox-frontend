@@ -27,13 +27,12 @@ export default function PostDetail() {
   const [newReply, setNewReply] = useState("");
   const [password, setPassword] = useState("");
   const [showPasswordPopup, setShowPasswordPopup] = useState(false);
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const fetchReplies = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:8080/post/${postId}/reply`,
-        { withCredentials: true }
-      );
+      const res = await axios.get(`${BASE_URL}/post/${postId}/reply`, {
+        withCredentials: true,
+      });
       setReplies(res.data.data);
     } catch (err) {
       console.error("댓글 불러오기 실패:", err);
@@ -51,7 +50,7 @@ export default function PostDetail() {
           }
         }
 
-        const res = await axios.get(`http://localhost:8080/post/${postId}`, {
+        const res = await axios.get(`${BASE_URL}/post/${postId}`, {
           withCredentials: true,
         });
 
@@ -73,7 +72,7 @@ export default function PostDetail() {
   const handlePasswordSubmit = async () => {
     try {
       const res = await axios.post(
-        `http://localhost:8080/post/secrete/${postId}`,
+        `${BASE_URL}/post/secrete/${postId}`,
         { pwd: password },
         { withCredentials: true }
       );
@@ -88,7 +87,7 @@ export default function PostDetail() {
   const handleDelete = () => {
     if (window.confirm("정말 삭제하시겠습니까?")) {
       axios
-        .delete(`http://localhost:8080/post/${postId}`, {
+        .delete(`${BASE_URL}/post/${postId}`, {
           withCredentials: true,
         })
         .then(() => {
@@ -101,7 +100,7 @@ export default function PostDetail() {
 
   const toggleBookmark = () => {
     axios
-      .post(`http://localhost:8080/post/bookmark/${postId}`, null, {
+      .post(`${BASE_URL}/post/bookmark/${postId}`, null, {
         withCredentials: true,
       })
       .then((res) => {
@@ -121,7 +120,7 @@ export default function PostDetail() {
     if (!newReply.trim()) return alert("댓글을 입력하세요.");
     axios
       .post(
-        `http://localhost:8080/post/${postId}/reply`,
+        `${BASE_URL}/post/${postId}/reply`,
         { content: newReply },
         { withCredentials: true }
       )

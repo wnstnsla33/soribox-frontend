@@ -6,7 +6,7 @@ export default function FindIdModal({ onClose }) {
   const [birth, setBirth] = useState("");
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   // 생일 입력받아서 자동 변환
   const formatBirth = (birthInput) => {
     if (birthInput.length === 8) {
@@ -34,7 +34,7 @@ export default function FindIdModal({ onClose }) {
     }
     try {
       const res = await axios.post(
-        "http://localhost:8080/find/id",
+        `${BASE_URL}/find/id`,
         {
           userName: email,
           userBirthDay: formattedBirth,

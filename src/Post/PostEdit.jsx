@@ -10,7 +10,7 @@ export default function PostEdit() {
   const { postId } = useParams();
   const navigate = useNavigate();
   const editorRef = useRef(null);
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
@@ -19,7 +19,7 @@ export default function PostEdit() {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const res = await axios.get(`http://localhost:8080/post/${postId}`, {
+        const res = await axios.get(`${BASE_URL}/post/${postId}`, {
           withCredentials: true,
         });
         const post = res.data.data;
@@ -41,15 +41,11 @@ export default function PostEdit() {
     const formData = new FormData();
     formData.append("image", blob);
     try {
-      const res = await axios.post(
-        "http://localhost:8080/post/image",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-          withCredentials: true,
-        }
-      );
-      const fullUrl = "http://localhost:8080" + res.data.data;
+      const res = await axios.post(`${BASE_URL}/post/image`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+      });
+      const fullUrl = `${BASE_URL}` + res.data.data;
       callback(fullUrl, "이미지");
     } catch (err) {
       toast.error("이미지 업로드 실패: " + (err.response?.data?.message || ""));
@@ -61,7 +57,7 @@ export default function PostEdit() {
     const contentHTML = editorRef.current.getInstance().getHTML();
     axios
       .put(
-        `http://localhost:8080/post/${postId}`,
+        `${BASE_URL}/post/${postId}`,
         { title, content: contentHTML },
         { withCredentials: true }
       )

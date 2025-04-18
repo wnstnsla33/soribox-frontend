@@ -7,10 +7,10 @@ export default function FriendRequestPopup({ onClose }) {
   const [page, setPage] = useState(0);
   const [lastPage, setLastPage] = useState(false);
   const observer = useRef();
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const loadRequests = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/friends/request", {
+      const res = await axios.get(`${BASE_URL}/friends/request`, {
         params: { page },
         withCredentials: true,
       });
@@ -42,16 +42,12 @@ export default function FriendRequestPopup({ onClose }) {
 
   const respondToFriend = async (fid, actionType) => {
     try {
-      const res = await axios.put(
-        `http://localhost:8080/friends/${fid}`,
-        actionType,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+      const res = await axios.put(`${BASE_URL}/friends/${fid}`, actionType, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      });
       toast.success(res.data.message);
       setRequests((prev) => prev.filter((r) => r.fid !== fid));
     } catch (err) {
@@ -79,7 +75,7 @@ export default function FriendRequestPopup({ onClose }) {
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <img
-                  src={`http://localhost:8080${req.friendsImg}`}
+                  src={`${BASE_URL}${req.friendsImg}`}
                   alt="img"
                   className="w-8 h-8 rounded-full object-cover"
                 />

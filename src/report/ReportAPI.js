@@ -10,6 +10,7 @@ export const createReport = async ({
   reason,
 }) => {
   try {
+    const BASE_URL = process.env.REACT_APP_API_URL;
     const payload = {
       targetId,
       targetType,
@@ -17,11 +18,9 @@ export const createReport = async ({
       reason,
     };
 
-    const response = await axios.post(
-      "http://localhost:8080/reports",
-      payload,
-      { withCredentials: true }
-    );
+    const response = await axios.post(`${BASE_URL}/reports`, payload, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);

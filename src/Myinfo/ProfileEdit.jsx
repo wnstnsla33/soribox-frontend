@@ -7,6 +7,7 @@ import { fetchUserInfo } from "../store/userSlice";
 import ProfileEditForm from "./ProfileEditForm";
 
 export default function ProfileEdit() {
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user.userInfo);
@@ -22,13 +23,9 @@ export default function ProfileEdit() {
       return;
     }
     try {
-      const res = await axios.post(
-        "http://localhost:8080/user/edit",
-        userData,
-        {
-          withCredentials: true,
-        }
-      );
+      const res = await axios.post(`${BASE_URL}/user/edit`, userData, {
+        withCredentials: true,
+      });
       dispatch(fetchUserInfo(res.data.data));
       alert("프로필이 성공적으로 수정되었습니다.");
       navigate("/profile");
@@ -49,7 +46,7 @@ export default function ProfileEdit() {
   // 이미지 기본 경로 세팅
   const updatedUser = {
     ...user,
-    userImg: `http://localhost:8080${user.userImg}`,
+    userImg: `${BASE_URL}${user.userImg}`,
   };
 
   return (

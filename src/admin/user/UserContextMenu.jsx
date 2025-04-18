@@ -10,7 +10,7 @@ export default function UserContextMenu({
   onSendMessage,
 }) {
   const navigate = useNavigate();
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const handleOptionClick = (action) => {
     onClose();
 
@@ -36,7 +36,7 @@ export default function UserContextMenu({
     if (!confirmed) return;
 
     axios
-      .delete(`http://localhost:8080/admin/user/${user.userId}`, {
+      .delete(`${BASE_URL}/admin/user/${user.userId}`, {
         withCredentials: true,
       })
       .then(() => {

@@ -4,11 +4,11 @@ import PostListComponent from "../Post/PostListComponent";
 export default function MainPost() {
   const [top10Post, setTop10Post] = useState([]);
   const [userBookmarks, setUserBookmarks] = useState(new Set());
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   useEffect(() => {
     const fetchTopPosts = async () => {
       try {
-        const postRes = await axios.get("http://localhost:8080/post/topView", {
+        const postRes = await axios.get(`${BASE_URL}/post/topView`, {
           withCredentials: true,
         });
 
@@ -23,7 +23,7 @@ export default function MainPost() {
   const toggleBookmark = async (postId) => {
     try {
       const res = await axios.post(
-        `http://localhost:8080/post/bookmark/${postId}`,
+        `${BASE_URL}/post/bookmark/${postId}`,
         {},
         { withCredentials: true }
       );

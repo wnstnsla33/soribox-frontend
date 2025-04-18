@@ -3,8 +3,9 @@ import axios from "axios";
 // 친구 요청 보내기
 export const requestFriend = async (userId) => {
   try {
+    const BASE_URL = process.env.REACT_APP_API_URL;
     const res = await axios.post(
-      `http://localhost:8080/friends/${userId}`,
+      `${BASE_URL}/friends/${userId}`,
       {},
       { withCredentials: true }
     );

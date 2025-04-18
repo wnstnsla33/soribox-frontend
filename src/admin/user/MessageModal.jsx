@@ -5,14 +5,14 @@ export default function MessageModal({ toUser, onClose }) {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [type, setType] = useState("NORMAL"); // 기본 메시지 타입
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const sendMessage = () => {
     if (!title.trim()) return alert("제목을 입력하세요.");
     if (!message.trim()) return alert("메시지를 입력하세요.");
 
     axios
       .post(
-        "http://localhost:8080/messages",
+        `${BASE_URL}/messages`,
         {
           title: title,
           content: message,

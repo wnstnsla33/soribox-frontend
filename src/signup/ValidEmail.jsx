@@ -5,7 +5,7 @@ export default function ValidEmail({ isValid, ref }) {
   const [sendCode, setSendCode] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const emailRef = ref;
   const codeRef = useRef(null);
 
@@ -17,12 +17,12 @@ export default function ValidEmail({ isValid, ref }) {
   const sendEmail = () => {
     if (!isEmailValid) return;
     axios
-      .get("http://localhost:8080/signup/confirm", {
+      .get(`${BASE_URL}/signup/confirm`, {
         params: { email: emailRef.current.value },
         withCredentials: true,
       })
       .then((res) => {
-        alert("이메일을 확인하세요");
+        alert(res.response.data.message);
         setSendCode(true); // ✅ 요거 추가해야 인증번호 필드 나옴!
       })
       .catch((error) => {
@@ -33,7 +33,7 @@ export default function ValidEmail({ isValid, ref }) {
   const codeValid = () => {
     axios
       .post(
-        "http://localhost:8080/signup/confirm",
+        `${BASE_URL}/signup/confirm`,
         { email: emailRef.current.value, authcode: codeRef.current.value },
         { withCredentials: true }
       )

@@ -5,9 +5,10 @@ import { useNavigate } from "react-router-dom";
 export default function NoticePost() {
   const [notices, setNotices] = useState([]);
   const navigate = useNavigate();
+  const BASE_URL = process.env.REACT_APP_API_URL;
   useEffect(() => {
     axios
-      .get("http://localhost:8080/post/notice", { withCredentials: true })
+      .get(`${BASE_URL}/post/notice`, { withCredentials: true })
       .then((res) => {
         setNotices(res.data.data); // PostListDTO[]
         console.log(res.data.message);

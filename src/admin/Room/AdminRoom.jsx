@@ -11,10 +11,10 @@ export default function AdminRoom() {
   const [totalPages, setTotalPages] = useState(0);
   const [contextMenu, setContextMenu] = useState(null); // {x, y, room}
   const navigate = useNavigate();
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const fetchRooms = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/admin/room", {
+      const res = await axios.get(`${BASE_URL}/admin/room`, {
         params: { page, name: keyword },
         withCredentials: true,
       });
@@ -34,12 +34,9 @@ export default function AdminRoom() {
     if (!confirmed) return;
 
     try {
-      const res = await axios.delete(
-        `http://localhost:8080/admin/room/${roomId}`,
-        {
-          withCredentials: true,
-        }
-      );
+      const res = await axios.delete(`${BASE_URL}/admin/room/${roomId}`, {
+        withCredentials: true,
+      });
       alert(res.data?.message);
       fetchRooms();
     } catch (error) {

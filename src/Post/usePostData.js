@@ -5,12 +5,12 @@ export default function usePostData(showBookmarksOnly, sortType, keyword) {
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const fetchData = async (pageNum) => {
     try {
       const url = showBookmarksOnly
-        ? `http://localhost:8080/post/mybookmark?page=${pageNum}&sortType=${sortType}&keyword=${keyword}`
-        : `http://localhost:8080/post?page=${pageNum}&sortType=${sortType}&keyword=${keyword}`;
+        ? `${BASE_URL}/post/mybookmark?page=${pageNum}&sortType=${sortType}&keyword=${keyword}`
+        : `${BASE_URL}/post?page=${pageNum}&sortType=${sortType}&keyword=${keyword}`;
       const postRes = await axios.get(url, { withCredentials: true });
       setPosts(postRes.data.data.posts || []);
       setTotalPages(Math.ceil(postRes.data.data.postCount) || 1);
@@ -23,7 +23,7 @@ export default function usePostData(showBookmarksOnly, sortType, keyword) {
   const toggleBookmark = async (postId) => {
     try {
       const res = await axios.post(
-        `http://localhost:8080/post/bookmark/${postId}`,
+        `${BASE_URL}/post/bookmark/${postId}`,
         {},
         { withCredentials: true }
       );

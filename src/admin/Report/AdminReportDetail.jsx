@@ -8,14 +8,13 @@ export default function AdminReportDetail() {
   const navigate = useNavigate();
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   useEffect(() => {
     const fetchReport = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:8080/admin/reports/${reportId}`,
-          { withCredentials: true }
-        );
+        const res = await axios.get(`${BASE_URL}/admin/reports/${reportId}`, {
+          withCredentials: true,
+        });
         setReport(res.data.data);
       } catch (err) {
         console.error("신고 상세 조회 실패", err);

@@ -3,12 +3,12 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function MyPost() {
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const [posts, setPosts] = useState([]);
-  const navigate = useNavigate();
 
   const getMyList = async () => {
     try {
-      const res = await axios.get(`http://localhost:8080/post/myPost`, {
+      const res = await axios.get(`${BASE_URL}/post/myPost`, {
         withCredentials: true,
       });
       setPosts(res.data.data || []);
@@ -25,7 +25,7 @@ export default function MyPost() {
   const handleDelete = (postId) => {
     if (window.confirm("정말 삭제하시겠습니까?")) {
       axios
-        .delete(`http://localhost:8080/post/${postId}`, {
+        .delete(`${BASE_URL}/post/${postId}`, {
           withCredentials: true,
         })
         .then(() => {

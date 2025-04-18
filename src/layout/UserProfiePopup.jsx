@@ -20,11 +20,11 @@ export default function UserProfilePopup({
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showUserInfo, setShowUserInfo] = useState(false);
   const popupRef = useRef();
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const bannedUser = async (targetUserId) => {
     try {
       const res = await axios.put(
-        "http://localhost:8080/chatRoom/banned",
+        `${BASE_URL}/chatRoom/banned`,
         {
           roomId: roomId,
           userId: targetUserId,
@@ -62,7 +62,7 @@ export default function UserProfilePopup({
   return (
     <div className="relative inline-block" ref={popupRef}>
       <img
-        src={`http://localhost:8080${userImg}`}
+        src={`${BASE_URL}${userImg}`}
         alt="프로필"
         className="w-10 h-10 rounded-full object-cover cursor-pointer hover:scale-105 transition"
         onClick={() => setOpen((prev) => !prev)}

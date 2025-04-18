@@ -6,9 +6,9 @@ export default function Stomp() {
   const clientRef = useRef(null);
   const roomId = "13074e64-f345-4fe0-ae58-5c610b2b8cbc"; // 💬 테스트용 채팅방 ID
   const userName = "tester"; // 임시 사용자명
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   useEffect(() => {
-    const socket = new SockJS("http://localhost:8080/ws-stomp");
+    const socket = new SockJS(`${BASE_URL}/ws-stomp`);
     const client = new Client({
       webSocketFactory: () => socket,
       debug: (str) => {},

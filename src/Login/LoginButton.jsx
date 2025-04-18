@@ -3,7 +3,7 @@ import { useState } from "react";
 
 export default function LoginButton({ email, password, onclose }) {
   const [error, setError] = useState("");
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const login = () => {
     if (!email || email.trim() === "") {
       setError("이메일을 입력하세요.");
@@ -18,7 +18,7 @@ export default function LoginButton({ email, password, onclose }) {
     console.log(email + "adfsdf" + password);
     axios
       .post(
-        "http://localhost:8080/login",
+        `${BASE_URL}/login`,
         { email: email, password: password }, // ✅ 'password'로 수정
         {
           headers: { "Content-Type": "application/json" },

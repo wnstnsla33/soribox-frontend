@@ -6,11 +6,11 @@ import { useEffect, useState } from "react";
 import NotFound from "../ErrorPage/NotFound";
 export default function AdminHeader() {
   const [authorized, setAuthorized] = useState(null);
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await axios.get("http://localhost:8080/admin", {
+        const res = await axios.get(`${BASE_URL}/admin`, {
           withCredentials: true,
         });
         setAuthorized(res.status === 200);

@@ -9,16 +9,14 @@ export default function MyMessageList() {
   const [keyword, setKeyword] = useState("");
   const [isReceived, setIsReceived] = useState(true); // ✅ 상태 기반으로 관리
   const navigate = useNavigate();
+  const BASE_URL = process.env.REACT_APP_API_URL;
 
   const fetchMessages = () => {
     axios
-      .get(
-        `http://localhost:8080/messages/${isReceived ? "received" : "sent"}`,
-        {
-          params: { keyword },
-          withCredentials: true,
-        }
-      )
+      .get(`${BASE_URL}/messages/${isReceived ? "received" : "sent"}`, {
+        params: { keyword },
+        withCredentials: true,
+      })
       .then((res) => {
         const { data } = res.data;
         console.log(data);

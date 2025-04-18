@@ -6,15 +6,14 @@ export default function Menu({ onClose, onFriendPopupOpen }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [friendRequestCount, setFriendRequestCount] = useState(0);
   const user = useSelector((state) => state.user.userInfo);
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   useEffect(() => {
     if (!user) return;
-    const fetchMessageCount = axios.get(
-      "http://localhost:8080/messages/unreadMsg",
-      { withCredentials: true }
-    );
+    const fetchMessageCount = axios.get(`${BASE_URL}/messages/unreadMsg`, {
+      withCredentials: true,
+    });
     const fetchFriendRequestCount = axios.get(
-      "http://localhost:8080/friends/request/count",
+      `${BASE_URL}/friends/request/count`,
       { withCredentials: true }
     );
 
