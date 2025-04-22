@@ -1,14 +1,16 @@
 import axios from "axios";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import ReportButton from "../report/ReportButton";
 import UserProfilePopup from "../layout/UserProfiePopup";
+import ReplyLikeButton from "./ReplyLikeButton";
+
 export default function Reply({ reply, postId, isChild = false, onRefresh }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
-  const [editedContent, setEditedContent] = useState(reply.content);
   const [newReply, setNewReply] = useState("");
+  const editedRef = useRef(null); // ✅ ref 사용
   const BASE_URL = process.env.REACT_APP_API_URL;
   const user = useSelector((state) => state.user.userInfo);
   const isAuthorized = user?.userId === reply.userId;
@@ -21,24 +23,28 @@ export default function Reply({ reply, postId, isChild = false, onRefresh }) {
         })
         .then(() => {
           alert("댓글이 삭제되었습니다.");
-          onRefresh?.();
+          onRefresh();
         })
         .catch((err) => alert(err.response.data.message));
     }
   };
 
   const handleEditSubmit = () => {
-    if (!editedContent.trim()) return alert("댓글 내용을 입력하세요.");
+    const updatedContent = editedRef.current.value; // ✅ ref에서 값 가져옴
+    if (!updatedContent.trim()) {
+      alert("댓글 내용을 입력하세요.");
+      return;
+    }
     axios
       .put(
         `${BASE_URL}/post/${reply.replyId}/reply`,
-        { content: editedContent },
+        { content: updatedContent },
         { withCredentials: true }
       )
       .then(() => {
         alert("댓글이 수정되었습니다.");
         setIsEditing(false);
-        onRefresh?.();
+        onRefresh();
       })
       .catch((err) => {
         alert(err.response.data.message);
@@ -46,7 +52,10 @@ export default function Reply({ reply, postId, isChild = false, onRefresh }) {
   };
 
   const handleReplySubmit = () => {
-    if (!newReply.trim()) return alert("답글을 입력하세요.");
+    if (!newReply.trim()) {
+      alert("답글을 입력하세요.");
+      return;
+    }
     axios
       .post(
         `${BASE_URL}/post/${postId}/reply`,
@@ -57,7 +66,7 @@ export default function Reply({ reply, postId, isChild = false, onRefresh }) {
         alert("답글이 작성되었습니다.");
         setIsReplying(false);
         setNewReply("");
-        onRefresh?.();
+        onRefresh();
       })
       .catch((err) => {
         console.error("답글 작성 실패:", err);
@@ -67,9 +76,7 @@ export default function Reply({ reply, postId, isChild = false, onRefresh }) {
 
   return (
     <div className="mb-6 pb-3 text-sm">
-      {/* 👤 프로필 이미지 + 닉네임 + 버튼들 */}
       <div className="flex justify-between items-center text-xs text-gray-600 mb-1">
-        {/* 왼쪽: 이미지 + 닉네임 */}
         <div className="flex items-center gap-2">
           <UserProfilePopup
             userImg={reply.userImg}
@@ -78,13 +85,10 @@ export default function Reply({ reply, postId, isChild = false, onRefresh }) {
           />
           <span className="font-semibold text-black">{reply.userNickname}</span>
         </div>
-
-        {/* 오른쪽: 날짜 + 버튼들 */}
         <div className="flex items-center gap-3">
           <span className="text-gray-400">
             {new Date(reply.createDate).toLocaleDateString("ko-KR")}
           </span>
-
           {!isChild && (
             <button
               onClick={() => setIsReplying(!isReplying)}
@@ -93,7 +97,6 @@ export default function Reply({ reply, postId, isChild = false, onRefresh }) {
               답글
             </button>
           )}
-
           {isAuthorized && (
             <>
               <button
@@ -110,7 +113,11 @@ export default function Reply({ reply, postId, isChild = false, onRefresh }) {
               </button>
             </>
           )}
-
+          <ReplyLikeButton
+            replyId={reply.replyId}
+            liked={reply.liked}
+            likeCount={reply.likeCount}
+          />
           <ReportButton
             targetId={reply.replyId}
             targetType="REPLY"
@@ -119,14 +126,13 @@ export default function Reply({ reply, postId, isChild = false, onRefresh }) {
         </div>
       </div>
 
-      {/* ✏️ 댓글 내용 or 수정 */}
       {!isEditing ? (
         <p className="text-gray-800 whitespace-pre-wrap">{reply.content}</p>
       ) : (
         <div className="mt-1 flex items-start gap-2">
           <textarea
-            value={editedContent}
-            onChange={(e) => setEditedContent(e.target.value)}
+            defaultValue={reply.content} // ✅ ref + defaultValue
+            ref={editedRef} // ✅ ref 연결
             className="w-full p-2 border border-gray-300 rounded-md text-sm"
             rows="3"
           />
@@ -139,7 +145,6 @@ export default function Reply({ reply, postId, isChild = false, onRefresh }) {
         </div>
       )}
 
-      {/* 🧵 답글 작성 */}
       {!isChild && isReplying && (
         <div className="mt-2 flex items-start gap-2">
           <textarea
@@ -158,7 +163,6 @@ export default function Reply({ reply, postId, isChild = false, onRefresh }) {
         </div>
       )}
 
-      {/* 👁️ 답글 보기 버튼 */}
       {!isChild && reply.replys?.length > 0 && (
         <button
           onClick={() => setShowReplies((prev) => !prev)}
@@ -168,7 +172,6 @@ export default function Reply({ reply, postId, isChild = false, onRefresh }) {
         </button>
       )}
 
-      {/* 💬 대댓글 렌더링 */}
       {showReplies && reply.replys?.length > 0 && (
         <div className="ml-4 mt-3 border-l pl-4 border-gray-300">
           {reply.replys.map((child) => (

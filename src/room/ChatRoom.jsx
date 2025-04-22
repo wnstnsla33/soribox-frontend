@@ -8,28 +8,30 @@ import axios from "axios";
 import "./ChatRoom.css";
 import ReportButton from "../report/ReportButton";
 import UserProfilePopup from "../layout/UserProfiePopup";
+
 export default function ChatRoom() {
   const { roomId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user.userInfo);
-
-  const [input, setInput] = useState("");
-  const [roomWithChat, setRoomWithChat] = useState(null);
-  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
-  const [passwordInput, setPasswordInput] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  console.log("업데이트됨 18 42");
+  const inputRef = useRef();
+  const passwordInputRef = useRef();
   const chatBoxRef = useRef(null);
   const BASE_URL = process.env.REACT_APP_API_URL;
+  const BASE_IMG = process.env.REACT_APP_IMG_URL;
+
+  const [roomWithChat, setRoomWithChat] = useState(null);
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   const handleEnterUser = (newUser) => {
     setRoomWithChat((prev) => {
       if (!prev || !newUser) return prev;
-
       const exists = prev.roomData.roomMembers?.some(
         (m) => m.userId === newUser.userId
       );
       if (exists) return prev;
-
       return {
         ...prev,
         roomData: {
@@ -66,17 +68,16 @@ export default function ChatRoom() {
   };
 
   const verifyPassword = async () => {
+    const pwd = passwordInputRef.current.value.trim();
     try {
       const res = await axios.post(
         `${BASE_URL}/chatRoom/${roomId}/verify`,
-        { password: passwordInput },
+        { password: pwd },
         { withCredentials: true }
       );
-
-      // ✅ 백엔드에서 바로 내려주는 값 세팅
       setRoomWithChat(res.data.data);
-      setMessages(res.data.data.messages); // 소켓 메시지 초기화
-      setShowPasswordPrompt(false); // 비밀번호 창 닫기
+      setMessages(res.data.data.messages);
+      setShowPasswordPrompt(false);
     } catch (err) {
       setErrorMessage(err.response?.data.message || "비밀번호 확인 실패");
     }
@@ -86,13 +87,12 @@ export default function ChatRoom() {
     const init = async () => {
       if (!user) {
         try {
-          const result = await dispatch(fetchUserInfo()).unwrap();
-        } catch (err) {
+          await dispatch(fetchUserInfo()).unwrap();
+        } catch {
           navigate("/");
           return;
         }
       }
-
       await fetchRoomWithChat();
     };
     init();
@@ -106,9 +106,10 @@ export default function ChatRoom() {
   }, [messages]);
 
   const handleSend = () => {
-    if (!input.trim()) return;
+    const input = inputRef.current.value.trim();
+    if (!input) return;
     sendMessage(input);
-    setInput("");
+    inputRef.current.value = ""; // ✅ 비우기
   };
 
   const handleExit = () => navigate("/");
@@ -120,7 +121,6 @@ export default function ChatRoom() {
       );
       if (!confirmDelete) return;
     }
-
     try {
       const res = await axios.delete(`${BASE_URL}/chatRoom/${roomId}`, {
         withCredentials: true,
@@ -144,8 +144,7 @@ export default function ChatRoom() {
           </h4>
           <input
             type="password"
-            value={passwordInput}
-            onChange={(e) => setPasswordInput(e.target.value)}
+            ref={passwordInputRef}
             className="border px-3 py-2 rounded w-full mb-2"
             placeholder="비밀번호"
           />
@@ -186,10 +185,19 @@ export default function ChatRoom() {
           <strong>방장:</strong> {roomData.hostName}
         </p>
         <p>
+          <strong>유형:</strong> {roomData.roomType}
+        </p>
+        <p>
+          <strong>모임 시간:</strong>{" "}
+          {roomData.meetingTime ? roomData.meetingTime : "미정"}
+        </p>
+        <p>
+          <strong>지역:</strong> {roomData.sido} {roomData.sigungu}
+        </p>
+        <p>
           <strong>참여 인원:</strong> {roomData.curPaticipants} /{" "}
           {roomData.maxParticipants}
         </p>
-        {console.log(user.userId)}
         <div className="flex items-center gap-2 mt-2 flex-wrap">
           {roomData.roomMembers?.map((member, idx) => (
             <UserProfilePopup
@@ -204,10 +212,6 @@ export default function ChatRoom() {
             />
           ))}
         </div>
-
-        <p>
-          <strong>유형:</strong> {roomData.roomType}
-        </p>
         <div
           dangerouslySetInnerHTML={{ __html: roomData.roomContent || "" }}
           className="room-content-wrapper"
@@ -238,9 +242,8 @@ export default function ChatRoom() {
         <div className="chat-input-wrap">
           <input
             autoFocus
+            ref={inputRef}
             className="chat-input"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
             placeholder="메시지를 입력하세요"
           />

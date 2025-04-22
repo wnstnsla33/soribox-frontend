@@ -15,7 +15,7 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isInfoOpen, setIsInfoOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-
+  const BASE_URL = process.env.REACT_APP_API_URL;
   const toggleWrite = () => {
     setIsWriteOpen((prev) => !prev);
     setIsMenuOpen(false);
@@ -56,7 +56,7 @@ export default function Header() {
   useEffect(() => {
     if (!userInfo) {
       dispatch(fetchUserInfo());
-      console.log("페칭");
+      console.log(BASE_URL);
     }
   }, []);
 

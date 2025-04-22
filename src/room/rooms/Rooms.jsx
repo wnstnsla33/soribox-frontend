@@ -40,7 +40,7 @@ export default function Rooms() {
         withCredentials: true,
       });
 
-      setRooms(res.data.data.content);
+      setRooms(res.data.data.data);
       setTotalPages(res.data.data.totalPages);
     } catch (err) {
       alert(err.response?.data?.message || "방 불러오기 실패");

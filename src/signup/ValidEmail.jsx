@@ -15,6 +15,7 @@ export default function ValidEmail({ isValid, ref }) {
   };
 
   const sendEmail = () => {
+    console.log("메일보냄");
     if (!isEmailValid) return;
     axios
       .get(`${BASE_URL}/signup/confirm`, {
@@ -22,11 +23,11 @@ export default function ValidEmail({ isValid, ref }) {
         withCredentials: true,
       })
       .then((res) => {
-        alert(res.response.data.message);
+        alert(res.data.message);
         setSendCode(true); // ✅ 요거 추가해야 인증번호 필드 나옴!
       })
       .catch((error) => {
-        alert(error);
+        alert(error.response.data.message);
       });
   };
 

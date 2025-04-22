@@ -84,6 +84,13 @@ export default function RoomCard({ room, onClick }) {
           </p>
         )}
 
+        {/* ✅ 추가된 주소 출력 */}
+        {room.sido && room.sigungu && (
+          <p className="text-sm text-gray-600 mb-1">
+            지역: {room.sido} {room.sigungu}
+          </p>
+        )}
+
         {room.meetingTime && (
           <p className="text-sm text-gray-700 truncate">
             {meetingTime.toLocaleString("ko-KR", {
@@ -105,7 +112,11 @@ export default function RoomCard({ room, onClick }) {
               .trim()}
           </p>
         )}
-
+        {room.recentChat && (
+          <p className="text-xs text-gray-500 mt-2">
+            💬 최근 채팅: {room.recentChat}
+          </p>
+        )}
         {room.roomMembers && <RoomMemberAvatar members={room.roomMembers} />}
       </div>
     </div>

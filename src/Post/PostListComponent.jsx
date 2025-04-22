@@ -90,6 +90,7 @@ export default function PostListComponent({ posts, ClickBookmark }) {
                     {post.userNickName}
                   </span>
                   <span>조회수 {post.viewCount}</span>
+                  <span>댓글 {post.replyCount}</span>
                 </div>
               </div>
             </div>

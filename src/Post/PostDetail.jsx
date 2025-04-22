@@ -1,6 +1,6 @@
+// PostDetail.jsx
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -12,7 +12,7 @@ import noBookmark from "../img/noBookmark.png";
 import ReportButton from "../report/ReportButton";
 import UserProfilePopup from "../layout/UserProfiePopup";
 import dayjs from "dayjs";
-
+import { useRef, useEffect, useState } from "react";
 export default function PostDetail() {
   const formatDateTime = (dateString) =>
     dayjs(dateString).format("YYYY-MM-DD HH:mm");
@@ -21,13 +21,15 @@ export default function PostDetail() {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user.userInfo);
   const dispatch = useDispatch();
-
+  const newReplyRef = useRef();
+  const passwordRef = useRef();
   const [post, setPost] = useState(null);
   const [replies, setReplies] = useState([]);
   const [newReply, setNewReply] = useState("");
   const [password, setPassword] = useState("");
   const [showPasswordPopup, setShowPasswordPopup] = useState(false);
   const BASE_URL = process.env.REACT_APP_API_URL;
+
   const fetchReplies = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/post/${postId}/reply`, {
@@ -38,47 +40,49 @@ export default function PostDetail() {
       console.error("댓글 불러오기 실패:", err);
     }
   };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (!user || !user.userId) {
-          try {
-            await dispatch(fetchUserInfo()).unwrap();
-          } catch {
-            // 비회원일 수 있으니 무시
-          }
+  const fetchData = async () => {
+    console.log("일단 업데이트됨");
+    try {
+      if (!user || !user.userId) {
+        try {
+          await dispatch(fetchUserInfo()).unwrap();
+        } catch {
+          // 비회원일 수도 있음
         }
-
-        const res = await axios.get(`${BASE_URL}/post/${postId}`, {
-          withCredentials: true,
-        });
-
-        if (res.data.data.title === "비밀글") {
-          setShowPasswordPopup(true);
-        } else {
-          setPost(res.data.data);
-          fetchReplies();
-        }
-      } catch (err) {
-        alert(err.response.data.message);
-        navigate("/");
       }
-    };
 
+      const res = await axios.get(`${BASE_URL}/post/${postId}`, {
+        withCredentials: true,
+      });
+
+      console.log(res.data.data); // ✅ 여기서 분리!
+
+      if (res.data.data.post.title === "비밀글") {
+        setShowPasswordPopup(true);
+      } else {
+        setPost(res.data.data.post); // ✅ 게시글만 세팅
+        setReplies(res.data.data.replyList); // ✅ 댓글 트리 세팅
+      }
+    } catch (err) {
+      alert(err.response.data.message);
+      navigate("/");
+    }
+  };
+  useEffect(() => {
     fetchData();
   }, [postId, dispatch]);
 
   const handlePasswordSubmit = async () => {
+    const pwd = passwordRef.current.value.trim();
     try {
       const res = await axios.post(
         `${BASE_URL}/post/secrete/${postId}`,
-        { pwd: password },
+        { pwd },
         { withCredentials: true }
       );
-      setPost(res.data.data);
+      setPost(res.data.data.post);
       setShowPasswordPopup(false);
-      fetchReplies();
+      setReplies(res.data.data.replyList);
     } catch {
       alert("비밀번호가 틀렸습니다.");
     }
@@ -87,9 +91,7 @@ export default function PostDetail() {
   const handleDelete = () => {
     if (window.confirm("정말 삭제하시겠습니까?")) {
       axios
-        .delete(`${BASE_URL}/post/${postId}`, {
-          withCredentials: true,
-        })
+        .delete(`${BASE_URL}/post/${postId}`, { withCredentials: true })
         .then(() => {
           alert("삭제되었습니다.");
           navigate("/post");
@@ -117,16 +119,17 @@ export default function PostDetail() {
   };
 
   const handleNewReplySubmit = () => {
-    if (!newReply.trim()) return alert("댓글을 입력하세요.");
+    const replyContent = newReplyRef.current.value.trim();
+    if (!replyContent) return alert("댓글을 입력하세요.");
     axios
       .post(
         `${BASE_URL}/post/${postId}/reply`,
-        { content: newReply },
+        { content: replyContent },
         { withCredentials: true }
       )
       .then(() => {
-        setNewReply("");
-        fetchReplies();
+        newReplyRef.current.value = ""; // ✅ 입력창 비우기
+        fetchReplies(); // ✅ post 안 불러오고 댓글만 새로고침
         toast.success("댓글 작성됨");
       })
       .catch((err) => {
@@ -142,8 +145,7 @@ export default function PostDetail() {
           <h2 className="text-lg font-bold mb-4">비밀번호를 입력하세요</h2>
           <input
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            ref={passwordRef}
             className="w-full p-2 border border-gray-300 rounded-md"
             placeholder="비밀번호 입력"
           />
@@ -236,8 +238,7 @@ export default function PostDetail() {
         <h2 className="text-2xl font-bold mb-4">댓글</h2>
         <div className="flex items-center gap-4 mb-4">
           <textarea
-            value={newReply}
-            onChange={(e) => setNewReply(e.target.value)}
+            ref={newReplyRef}
             placeholder="댓글을 작성하세요..."
             className="w-full h-20 p-2 border border-gray-300 rounded-md"
           />

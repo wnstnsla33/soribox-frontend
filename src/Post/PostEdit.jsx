@@ -19,12 +19,19 @@ export default function PostEdit() {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const res = await axios.get(`${BASE_URL}/post/${postId}`, {
+        const res = await axios.get(`${BASE_URL}/post/edit/${postId}`, {
           withCredentials: true,
         });
-        const post = res.data.data;
-        setTitle(post.title);
-        setContent(post.content);
+        const post = res.data;
+
+        setTitle(post.data.title);
+        setContent(post.data.content);
+        // ✅ 여기서 setHTML로 강제 세팅!
+        setTimeout(() => {
+          if (editorRef.current) {
+            editorRef.current.getInstance().setHTML(post.content);
+          }
+        }, 0);
       } catch (err) {
         console.error("게시글 로딩 실패:", err);
         toast.error("게시글을 불러오지 못했습니다.");
@@ -45,7 +52,7 @@ export default function PostEdit() {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       });
-      const fullUrl = `${BASE_URL}` + res.data.data;
+      const fullUrl = `${BASE_URL}${res.data.data}`;
       callback(fullUrl, "이미지");
     } catch (err) {
       toast.error("이미지 업로드 실패: " + (err.response?.data?.message || ""));
@@ -103,7 +110,7 @@ export default function PostEdit() {
             height="400px"
             initialEditType="wysiwyg"
             useCommandShortcut={true}
-            initialValue={content}
+            initialValue={content} // ✅ 여기는 필요하지만, 실제 세팅은 setHTML에서 함
             hooks={{ addImageBlobHook: handleImageUpload }}
           />
         </div>

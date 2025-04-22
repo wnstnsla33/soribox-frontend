@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function RoomMemberAvatars({ members }) {
   const navigate = useNavigate();
-  const BASE_URL = process.env.REACT_APP_API_URL;
+  const BASE_IMG = process.env.REACT_APP_IMG_URL;
   const handleUserClick = (e, userId) => {
     e.stopPropagation(); // ✅ 행 클릭 방지
     navigate(`/admin/users/${userId}`); // ✅ 유저 상세로 이동
@@ -18,7 +18,7 @@ export default function RoomMemberAvatars({ members }) {
           className="flex items-center gap-1 cursor-pointer hover:bg-gray-100 p-1 rounded transition"
         >
           <img
-            src={`${BASE_URL}${member.userImg}`}
+            src={`${BASE_IMG}${member.userImg}`}
             alt="avatar"
             className="w-8 h-8 rounded-full border-2 border-white object-cover"
           />

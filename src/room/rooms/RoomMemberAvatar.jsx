@@ -2,12 +2,14 @@ import React from "react";
 
 export default function RoomMemberAvatar({ members = [] }) {
   const BASE_URL = process.env.REACT_APP_API_URL;
+  const BASE_IMG = process.env.REACT_APP_IMG_URL;
+
   return (
     <div className="flex items-center gap-[-0.5rem] mt-4 relative z-10">
       {members.slice(0, 5).map((member, idx) => (
         <div key={idx} className="relative group">
           <img
-            src={`${BASE_URL}${member.userImg}`}
+            src={`${BASE_IMG}${member.userImg}`}
             alt={member.userNickName}
             className="w-8 h-8 rounded-full border-2 border-white -ml-2 first:ml-0 object-cover"
           />

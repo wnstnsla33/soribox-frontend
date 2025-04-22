@@ -14,7 +14,7 @@ export default function WritePost() {
   const BASE_URL = process.env.REACT_APP_API_URL;
   const extractFirstImageSrc = (html) => {
     const match = html.match(/<img[^>]+src=["']?([^>"']+)["']?/);
-    return match ? match[1] : `${BASE_URL}/uploads/noimg.png`;
+    return match ? match[1] : `${BASE_URL}/uploads/classicImage/noimg.png`;
   };
 
   const handleImageUpload = async (blob, callback) => {
