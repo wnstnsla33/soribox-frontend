@@ -115,7 +115,7 @@ export default function ChatRoom() {
   const handleExit = () => navigate("/");
 
   const handleLeaveRoom = async () => {
-    if (roomWithChat?.roomData?.hostName === user?.userName) {
+    if (roomWithChat?.roomData?.hostName === user?.userNickName) {
       const confirmDelete = window.confirm(
         "이 방은 삭제됩니다. 정말 나가시겠습니까?"
       );
@@ -177,9 +177,18 @@ export default function ChatRoom() {
   return (
     <div className="chat-room-wrapper styled-theme">
       <div className="room-info-panel relative">
-        <div className="absolute top-2 right-2">
+        <div className="absolute top-2 right-2 flex items-center gap-2">
           <ReportButton targetId={roomData.roomId} targetType="ROOM" />
+          {user.userId === roomData.hostId && (
+            <button
+              onClick={() => navigate(`/room/edit/${roomData.roomId}`)}
+              className="text-red-500 hover:underline text-xs"
+            >
+              수정
+            </button>
+          )}
         </div>
+
         <h3>{roomData.roomTitle}</h3>
         <p>
           <strong>방장:</strong> {roomData.hostName}

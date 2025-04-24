@@ -1,7 +1,6 @@
 // PostDetail.jsx
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchUserInfo } from "../store/userSlice";
@@ -12,6 +11,7 @@ import noBookmark from "../img/noBookmark.png";
 import ReportButton from "../report/ReportButton";
 import UserProfilePopup from "../layout/UserProfiePopup";
 import dayjs from "dayjs";
+import { toast } from "react-toastify";
 import { useRef, useEffect, useState } from "react";
 export default function PostDetail() {
   const formatDateTime = (dateString) =>
@@ -91,12 +91,24 @@ export default function PostDetail() {
   const handleDelete = () => {
     if (window.confirm("정말 삭제하시겠습니까?")) {
       axios
-        .delete(`${BASE_URL}/post/${postId}`, { withCredentials: true })
-        .then(() => {
-          alert("삭제되었습니다.");
+        .delete(`${process.env.REACT_APP_API_URL}/post/${postId}`, {
+          withCredentials: true,
+        })
+        .then((res) => {
+          toast.success(res.data.message, {
+            position: "top-center",
+            autoClose: 2000, // 2초 후 자동 닫힘 (원하면 조정 가능)
+          });
           navigate("/post");
         })
-        .catch(() => alert("삭제 실패"));
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data.message || "삭제 실패: 서버 오류입니다.";
+          toast.error(errorMessage, {
+            position: "top-center",
+            autoClose: 2000,
+          });
+        });
     }
   };
 

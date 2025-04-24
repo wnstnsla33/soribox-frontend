@@ -14,7 +14,7 @@ export default function RoomCard({ room, onClick }) {
   const diffDays = Math.ceil((meetingDay - today) / (1000 * 60 * 60 * 24));
   const BASE_URL = process.env.REACT_APP_API_URL;
   const isPrivate = room.private;
-
+  console.log(room);
   if (isPrivate) {
     return (
       <div

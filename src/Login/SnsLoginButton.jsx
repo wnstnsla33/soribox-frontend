@@ -1,11 +1,12 @@
 export default function SnsLoginButton() {
   const BASE_URL = process.env.REACT_APP_API_URL;
   const naverLogin = () => {
-    window.location.href = `${BASE_URL}/oauth2/authorization/naver`;
+    window.location.href = `http://soribox.kro.kr/oauth2/authorization/naver
+`;
   };
 
   const kakaoLogin = () => {
-    window.location.href = `${BASE_URL}/oauth2/authorization/kakao`;
+    window.location.href = `http://soribox.kro.kr/oauth2/authorization/kakao`;
   };
 
   const googleLogin = () => {

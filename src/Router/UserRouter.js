@@ -17,6 +17,7 @@ import NoticePost from "../Post/NoticePost";
 import MyMessageList from "../message/MyMessageList";
 import { MessageDetail } from "../message/MessageDetail";
 import RequireAuth from "./RequireAuth";
+import RoomEdit from "../room/RoomEdit";
 const UserRouter = [
   {
     path: "/",
@@ -83,6 +84,14 @@ const UserRouter = [
         element: (
           <RequireAuth>
             <ChatRoom />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "/room/edit/:roomId",
+        element: (
+          <RequireAuth>
+            <RoomEdit />
           </RequireAuth>
         ),
       },

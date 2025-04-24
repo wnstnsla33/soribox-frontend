@@ -28,6 +28,7 @@ export const fetchUserInfo = createAsyncThunk(
       const res = await axios.get(`${BASE_URL}/user`, {
         withCredentials: true,
       });
+      console.log("로그인 정보");
       console.log(res);
       return res.data.data;
     } catch (err) {

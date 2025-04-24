@@ -90,7 +90,6 @@ export default function PostListComponent({ posts, ClickBookmark }) {
                     {post.userNickName}
                   </span>
                   <span>조회수 {post.viewCount}</span>
-                  <span>댓글 {post.replyCount}</span>
                 </div>
               </div>
             </div>
@@ -135,6 +134,7 @@ export default function PostListComponent({ posts, ClickBookmark }) {
                       {post.userNickName}
                     </span>
                     <span>조회수 {post.viewCount}</span>
+                    <span>댓글 {post.replyCount}</span>
                   </div>
                   <div className="text-xs text-gray-400">
                     {formatDate(post.createDate)}
