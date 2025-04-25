@@ -1,7 +1,6 @@
 import React from "react";
 
 export default function RoomMemberAvatar({ members = [] }) {
-  const BASE_URL = process.env.REACT_APP_API_URL;
   const BASE_IMG = process.env.REACT_APP_IMG_URL;
 
   return (

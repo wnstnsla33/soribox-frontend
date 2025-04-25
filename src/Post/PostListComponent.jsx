@@ -9,11 +9,12 @@ export default function PostListComponent({ posts, ClickBookmark }) {
   const [password, setPassword] = useState("");
   const [selectedPostId, setSelectedPostId] = useState(null);
   const navigate = useNavigate();
+  const BASE_IMG = process.env.REACT_APP_IMG_URL;
   const BASE_URL = process.env.REACT_APP_API_URL;
   const getFirstImageFromContent = (html) => {
-    if (!html) return `${BASE_URL}/uploads/classicImage/noimg.png`;
+    if (!html) return `${BASE_IMG}/uploads/classicImage/noimg.png`;
     const match = html.match(/<img[^>]+src=["']?([^>"']+)["']?[^>]*>/);
-    return match?.[1] || `${BASE_URL}/uploads/classicImage/noimg.png`;
+    return match?.[1] || `${BASE_IMG}/uploads/classicImage/noimg.png`;
   };
 
   const getTextOnlyFromContent = (html) => {

@@ -6,6 +6,8 @@ import dayjs from "dayjs";
 export default function UserInfoPopup({ userId, onClose }) {
   const [user, setUser] = useState(null);
   const BASE_URL = process.env.REACT_APP_API_URL;
+  const BASE_IMG = process.env.REACT_APP_IMG_URL;
+
   useEffect(() => {
     axios
       .get(`${BASE_URL}/user/detail/${userId}`, {
@@ -41,7 +43,7 @@ export default function UserInfoPopup({ userId, onClose }) {
 
         <div className="flex items-center gap-4 mb-4">
           <img
-            src={`${BASE_URL}${user.userImg}`}
+            src={`${BASE_IMG}${user.userImg}`}
             alt="프로필"
             className="w-16 h-16 rounded-full object-cover border"
           />

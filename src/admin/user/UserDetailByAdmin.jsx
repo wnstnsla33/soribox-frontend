@@ -9,6 +9,8 @@ export default function UserDetailByAdmin() {
   const [user, setUser] = useState(null);
   const [tab, setTab] = useState("chats");
   const BASE_URL = process.env.REACT_APP_API_URL;
+  const BASE_IMG = process.env.REACT_APP_IMG_URL;
+
   const fetchUser = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/admin/user/${userId}`, {

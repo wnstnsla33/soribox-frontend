@@ -7,6 +7,7 @@ export default function FriendListPopup({ onClose }) {
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(true);
   const BASE_URL = process.env.REACT_APP_API_URL;
+  const BASE_IMG = process.env.REACT_APP_IMG_URL;
   const fetchFriends = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/friends`, {

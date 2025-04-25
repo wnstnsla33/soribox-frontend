@@ -14,7 +14,6 @@ export default function ChatRoom() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user.userInfo);
-  console.log("업데이트됨 18 42");
   const inputRef = useRef();
   const passwordInputRef = useRef();
   const chatBoxRef = useRef(null);

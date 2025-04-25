@@ -7,6 +7,7 @@ export default function UserModal({
   onClose,
   onFriendListOpen,
 }) {
+  const BASE_IMG = process.env.REACT_APP_IMG_URL;
   const BASE_URL = process.env.REACT_APP_API_URL;
   return (
     <div className="absolute top-16 right-4 w-64 bg-white shadow-lg rounded-lg border border-gray-200 z-50">
@@ -15,7 +16,7 @@ export default function UserModal({
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold">내 정보</h2>
           <img
-            src={`${BASE_URL}${user.userImg}`}
+            src={`${BASE_IMG}${user.userImg}`}
             alt="유저 프로필"
             className="w-12 h-12 rounded-full object-cover border"
           />

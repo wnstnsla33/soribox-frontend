@@ -7,6 +7,7 @@ import { fetchUserInfo } from "../store/userSlice";
 import ProfileEditForm from "./ProfileEditForm";
 
 export default function ProfileEdit() {
+  const BASE_IMG = process.env.REACT_APP_IMG_URL;
   const BASE_URL = process.env.REACT_APP_API_URL;
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -46,7 +47,7 @@ export default function ProfileEdit() {
   // 이미지 기본 경로 세팅
   const updatedUser = {
     ...user,
-    userImg: `${BASE_URL}${user.userImg}`,
+    userImg: `${BASE_IMG}${user.userImg}`,
   };
 
   return (

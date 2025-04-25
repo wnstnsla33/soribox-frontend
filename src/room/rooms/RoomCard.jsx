@@ -13,6 +13,7 @@ export default function RoomCard({ room, onClick }) {
   meetingDay.setHours(0, 0, 0, 0);
   const diffDays = Math.ceil((meetingDay - today) / (1000 * 60 * 60 * 24));
   const BASE_URL = process.env.REACT_APP_API_URL;
+  const BASE_IMG = process.env.REACT_APP_IMG_URL;
   const isPrivate = room.private;
   console.log(room);
   if (isPrivate) {
@@ -24,7 +25,7 @@ export default function RoomCard({ room, onClick }) {
         {/* 우측 고정 이미지 */}
         <div className="absolute top-6 right-6 w-24 h-24">
           <img
-            src={`${BASE_URL}/uploads/classicImage/privateRoom.png`}
+            src={`${BASE_IMG}/uploads/classicImage/privateRoom.png`}
             alt="private room"
             className="w-full h-full object-cover rounded-lg border"
           />

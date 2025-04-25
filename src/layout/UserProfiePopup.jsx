@@ -21,6 +21,7 @@ export default function UserProfilePopup({
   const [showUserInfo, setShowUserInfo] = useState(false);
   const popupRef = useRef();
   const BASE_URL = process.env.REACT_APP_API_URL;
+  const BASE_IMG = process.env.REACT_APP_IMG_URL;
   const bannedUser = async (targetUserId) => {
     try {
       const res = await axios.put(
@@ -62,7 +63,7 @@ export default function UserProfilePopup({
   return (
     <div className="relative inline-block" ref={popupRef}>
       <img
-        src={`${BASE_URL}${userImg}`}
+        src={`${BASE_IMG}${userImg}`}
         alt="프로필"
         className="w-10 h-10 rounded-full object-cover cursor-pointer hover:scale-105 transition"
         onClick={() => setOpen((prev) => !prev)}

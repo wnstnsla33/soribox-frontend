@@ -15,6 +15,7 @@ export default function AdminReportDetail() {
         const res = await axios.get(`${BASE_URL}/admin/reports/${reportId}`, {
           withCredentials: true,
         });
+        console.log(res.data);
         setReport(res.data.data);
       } catch (err) {
         console.error("신고 상세 조회 실패", err);

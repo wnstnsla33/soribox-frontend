@@ -6,6 +6,7 @@ import DeleteConfirmModal from "./DeleteConfirmModal";
 
 export default function Profile() {
   const user = useSelector((state) => state.user.userInfo);
+  const BASE_IMG = process.env.REACT_APP_IMG_URL;
   const BASE_URL = process.env.REACT_APP_API_URL;
   const isSNS =
     user?.userEmail.startsWith("naver ") ||
@@ -40,7 +41,7 @@ export default function Profile() {
       {/* 프로필 이미지 및 닉네임 */}
       <div className="flex items-center gap-6">
         <img
-          src={`${BASE_URL}${user.userImg}`}
+          src={`${BASE_IMG}${user.userImg}`}
           alt="유저 프로필 이미지"
           className="w-32 h-32 rounded-full object-cover border"
         />

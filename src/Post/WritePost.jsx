@@ -12,9 +12,10 @@ export default function WritePost() {
   const [isSubmitting, setIsSubmitting] = useState(false); // ✅ 중복 클릭 방지
   const navigate = useNavigate();
   const BASE_URL = process.env.REACT_APP_API_URL;
+  const BASE_IMG = process.env.REACT_APP_IMG_URL;
   const extractFirstImageSrc = (html) => {
     const match = html.match(/<img[^>]+src=["']?([^>"']+)["']?/);
-    return match ? match[1] : `${BASE_URL}/uploads/classicImage/noimg.png`;
+    return match ? match[1] : `${BASE_IMG}/uploads/classicImage/noimg.png`;
   };
 
   const handleImageUpload = async (blob, callback) => {
